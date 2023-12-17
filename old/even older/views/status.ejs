@@ -1,0 +1,380 @@
+<html>
+
+<head>
+  <style>
+    .statuspage {
+      min-height: calc(100vh - 140px);
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .status-content {
+      min-height: calc(100vh - 292px);
+    }
+
+    .statusbar {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      width: 100%;
+      box-shadow: 0 5px 15px 0 rgba(0, 0, 0, 0.1);
+      margin: 0 auto;
+      margin-top: 15px;
+      margin-bottom: 38px;
+    }
+
+    .statuspage-statusbar-status {
+      width: 100%;
+      height: 85px;
+      color: #ffffff;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+      flex-direction: row;
+      padding: 6px 30px;
+      -webkit-align-items: center;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      align-items: center;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 5px;
+    }
+
+    .statuspage-statusbar-status.up {
+      background-color: #03b66c;
+    }
+
+    .statuspage-statusbar-status.down {
+      background-color: #ff3d3d;
+    }
+
+    .statuspage-statusbar-status.up .status-text {
+      text-transform: uppercase;
+      font-size: 1.2rem;
+    }
+
+    .status-days {
+      color: #585858;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+      -ms-flex-pack: center;
+      justify-content: center;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 400;
+      padding-bottom: 2px;
+      margin: 0.67em 0;
+    }
+
+    .status-days strong {
+      font-weight: 300;
+    }
+
+    .checklist-wrapper {
+      border-radius: 4px;
+      box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+      background: #fff;
+    }
+
+    .statuspage-checks {
+      background-color: #ffffff;
+      border-radius: 5px;
+      margin: 0;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: space-around;
+      -webkit-justify-content: space-around;
+      -ms-flex-pack: space-around;
+      justify-content: space-around;
+      -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+      flex-direction: column;
+      padding-bottom: 3px;
+      padding-top: 10px;
+      margin-left: 12px;
+      margin-right: 10px;
+      -webkit-transition: all 500ms linear;
+      transition: all 500ms linear;
+    }
+
+    .statuspage-checks:first-child {
+      padding-top: 15px;
+    }
+
+    a.statuspage-checks-link {
+      color: #4a93e3;
+      -webkit-text-decoration: none;
+      text-decoration: none;
+    }
+
+    .statuspage-checks-content {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+      -webkit-justify-content: space-between;
+      -ms-flex-pack: justify;
+      justify-content: space-between;
+      padding-top: 1em;
+      padding-right: 1em;
+      padding-left: 1em;
+    }
+
+    .statuspage-checks-name-div {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+      -ms-flex-pack: center;
+      justify-content: center;
+      -webkit-align-items: center;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      align-items: center;
+    }
+
+    .statuspage-checks-name {
+      font-weight: 500;
+      color: #218fff;
+      font-size: 17px;
+      padding-bottom: 7px;
+      padding-left: 1em;
+      width: auto;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .statuspage-checks-info {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: space-around;
+      -webkit-justify-content: space-around;
+      -ms-flex-pack: space-around;
+      justify-content: space-around;
+      width: 250px;
+    }
+
+    .statuspage-checks-title {
+      color: #585858;
+      font-size: 0.85em;
+      font-weight: 400;
+    }
+
+    .statuspage-checks-data {
+      font-size: 16px;
+      font-weight: 500;
+      color: #929e91;
+      padding-top: 8px;
+    }
+
+    /* Cool lil bar chart */
+    .barchart {
+      height: 22px;
+      padding: 10px 0px 4px;
+      width: 100%;
+      display: flex;
+      -webkit-box-pack: center;
+      justify-content: center;
+    }
+
+    .barchart-wrapper {
+      float: left;
+      position: relative;
+      height: 100%;
+      width: 3px;
+      cursor: pointer;
+      border-left: 1px solid rgb(255, 255, 255);
+      border-right: 1px solid rgb(255, 255, 255);
+      opacity: 0.6;
+      background: rgb(3, 182, 108);
+    }
+
+    .barchart-wrapper.down {
+      background: rgb(250, 109, 70);
+    }
+
+    .statuspage-footer {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: center;
+      -webkit-justify-content: center;
+      -ms-flex-pack: center;
+      justify-content: center;
+      margin: 5px auto;
+      padding: 10px;
+    }
+
+    .statuspage-footer-brand {
+      position: relative;
+      z-index: 9;
+    }
+
+    .statuspage-footer-brand .badge {
+      display: block;
+      color: #ABB8C8;
+      padding: 22px 0;
+      border-radius: 4px;
+      font-weight: 400;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="statuspage">
+    <div class="status-content">
+      <div class="statusbar">
+        <div class="statuspage-statusbar-status up">
+          <svg width="34" height="34" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" class="statuspage-up-tick">
+            <g id="Page-1" fill="none" fill-rule="evenodd">
+              <g id="002_domains-copy" transform="translate(-180 -106)">
+                <g id="Group-12" transform="translate(90 68)">
+                  <g id="up_1" transform="translate(90 38)">
+                    <circle id="Oval-3" fill="white" cx="20" cy="20" r="20"></circle>
+                    <polyline id="Path-3" stroke="#4CC149" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="matrix(-1 0 0 1 39.36 0)" points="13 16 14.3358517 17.3169197 16.4362532 19.387554 22.0347079 24.9066664 26.3599997 20.6426735"></polyline>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </svg>
+          <span class="status-text"> All systems operational </span>
+        </div>
+      </div>
+      <div class="status-days">
+        Status : &nbsp;
+        <strong class="jsx-3736965384 jsx-3144740325"> Last 7 days </strong>
+      </div>
+      <div class="checklist-wrapper">
+        <!-- item 1 start -->
+        <div class="statuspage-checks">
+          <a class="statuspage-checks-link">
+            <div class="statuspage-checks-content">
+              <div class="statuspage-checks-name-div">
+                <div>
+                  <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                    <g id="Page-1" fill="none" fill-rule="evenodd">
+                      <g id="002_domains-copy" transform="translate(-480 -303)">
+                        <g id="Group" transform="translate(90 274)">
+                          <g id="up_2" transform="translate(390 29)">
+                            <circle id="Oval-3" fill="#4CC149" cx="9" cy="9" r="9"></circle>
+                            <polyline id="Path-3" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="5.7339027 9.1665427 7.77329526 11.2059353 11.0467215 7.932509 11.7573917 7.2218388 12.3339027 6.64532782"></polyline>
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+                <div class="statuspage-checks-name">
+                  Fsh bot - bot
+                </div>
+              </div>
+            </div>
+            <div class="statuspage-checks-info">
+              <div>
+                <div class="statuspage-checks-title">
+                  Availability
+                </div>
+                <div class="statuspage-checks-data">
+                  99.74%
+                </div>
+              </div>
+            </div>
+          </a>
+          <div id="botUptime" class="barchart">
+            <% for (var i_index in bot.response_times) { %>
+            <div id="botUptime_<%=i_index%>" class="barchart-wrapper <%if(bot.response_times[i_index].duration_seconds_not_responding != null){%>down<%}%>"
+              ></div>
+              <% } %>
+            </div>
+        </div>
+        <!-- item 1 end-->
+        <!-- item 2 start-->
+        <div class="statuspage-checks">
+          <a class="statuspage-checks-link">
+            <div class="statuspage-checks-content">
+              <div class="statuspage-checks-name-div">
+                <div>
+                  <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+                    <g id="Page-1" fill="none" fill-rule="evenodd">
+                      <g id="002_domains-copy" transform="translate(-480 -303)">
+                        <g id="Group" transform="translate(90 274)">
+                          <g id="up_2" transform="translate(390 29)">
+                            <circle id="Oval-3" fill="#4CC149" cx="9" cy="9" r="9"></circle>
+                            <polyline id="Path-3" stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="5.7339027 9.1665427 7.77329526 11.2059353 11.0467215 7.932509 11.7573917 7.2218388 12.3339027 6.64532782"></polyline>
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+                <div class="statuspage-checks-name">
+                  Fsh bot - bot
+                </div>
+              </div>
+            </div>
+            <div class="statuspage-checks-info">
+              <div>
+                <div class="statuspage-checks-title">
+                  Availability
+                </div>
+                <div class="statuspage-checks-data">
+                  99.74%
+                </div>
+              </div>
+            </div>
+          </a>
+          <div id="botUptime" class="barchart">
+            <% for (var i_index in bot.response_times) { %>
+            <div id="botUptime_<%=i_index%>" class="barchart-wrapper <%if(bot.response_times[i_index].duration_seconds_not_responding != null){%>down<%}%>"
+              ></div>
+              <% } %>
+            </div>
+        </div>
+        <!-- item 2 end-->
+      </div>
+      <div class=" statuspage-footer">
+              <div class="statuspage-footer-brand">
+                <p class="badge">Fsh<br />My love</p>
+              </div>
+            </div>
+          </div>
+          <br />
+          <br />
+          report_start: <%= bot.report_start %>
+          <br />
+          <br />
+          report_end: <%= bot.report_end %>
+          <br />
+          <br />
+          aggregate_by: <%= bot.aggregate_by %>
+          <br />
+          <br />
+          Bot response_times: <%= JSON.stringify(bot.response_times) %>
+          <br />
+          <br />
+          full report: <%= JSON.stringify(bot) %>
+</body>
+
+</html>
