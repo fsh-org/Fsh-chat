@@ -24,18 +24,18 @@
   <body style="margin:0;padding:0;">
     <table>
       <tr>
-        <td><img width="50" src="https://fsh.plus/fsh.png"></td>
+        <td><img width="50" height="50" src="https://fsh.plus/fsh.png" alt="logo"></td>
         <td><h1 style="margin:0;">Fsh chat</h1></td>
       </tr>
     </table>
-    <label>Name:</label>
+    <label for="name">Name:</label>
     <input id="name">
     <label id="Co"></label>
     <div class="list">
       <div id="msg" class="muu"></div>
 			
       <div style="position:absolute;bottom:0;left:0;right:0;background-color:#111;">
-        <textarea id="message" style="font-size:18px;margin-bottom:-6px;" rows="1"></textarea>
+        <textarea id="message" style="font-size:18px;margin-bottom:-6px;" rows="1" aria-label="Message"></textarea>
         <button onclick="send()" aria-label="send"><svg xmlns="http://www.w3.org/2000/svg" height="18" width="22" viewBox="0 0 512 512"><path fill="#fff" d="M307 34.8c-11.5 5.1-19 16.6-19 29.2v64H176C78.8 128 0 206.8 0 304C0 417.3 81.5 467.9 100.2 478.1c2.5 1.4 5.3 1.9 8.1 1.9c10.9 0 19.7-8.9 19.7-19.7c0-7.5-4.3-14.4-9.8-19.5C108.8 431.9 96 414.4 96 384c0-53 43-96 96-96h96v64c0 12.6 7.4 24.1 19 29.2s25 3 34.4-5.4l160-144c6.7-6.1 10.6-14.7 10.6-23.8s-3.8-17.7-10.6-23.8l-160-144c-9.4-8.5-22.9-10.6-34.4-5.4z"/></svg></button>
         <button onclick="document.getElementById('files').click()" aria-label="add file"><svg xmlns="http://www.w3.org/2000/svg" height="18" width="20" viewBox="0 0 576 512"><path fill="#fff" d="M0 64C0 28.7 28.7 0 64 0H224V128c0 17.7 14.3 32 32 32H384v38.6C310.1 219.5 256 287.4 256 368c0 59.1 29.1 111.3 73.7 143.3c-3.2 .5-6.4 .7-9.7 .7H64c-35.3 0-64-28.7-64-64V64zm384 64H256V0L384 128zm48 96a144 144 0 1 1 0 288 144 144 0 1 1 0-288zm16 80c0-8.8-7.2-16-16-16s-16 7.2-16 16v48H368c-8.8 0-16 7.2-16 16s7.2 16 16 16h48v48c0 8.8 7.2 16 16 16s16-7.2 16-16V384h48c8.8 0 16-7.2 16-16s-7.2-16-16-16H448V304z"/></svg></button>
 		
