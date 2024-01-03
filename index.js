@@ -12,7 +12,7 @@ const server = require('http').createServer(app);
 const { Server } = require("socket.io");
 
 const io = new Server(server, {
-  maxHttpBufferSize: 1e8 // 100 mb
+  maxHttpBufferSize: 1e9 // 1 gb
 })
 // changed server create a little to increase file size limit
 
@@ -58,6 +58,16 @@ app.get('/', function(req, res) {
 app.get('/style.css', function(req, res) {
   res.sendFile(path.join(__dirname, 'style.css'))
 });
+
+app.get('/ping.mp3', function(req, res) {
+  res.sendFile(path.join(__dirname, 'ping.mp3'))
+});
+
+app.get('/tenor', async function(req, res) {
+  let data = await fetch('https://tenor.googleapis.com/v2/search?key='+process.env['tenor']+'&country=US&locale=US-en&limit=25&media_filter=gif&q='+req.query['q']);
+  data = await data.json();
+  res.json(data)
+})
 
 io.on('connection', (socket) => {
   io.emit("message", {
