@@ -1,67 +1,23 @@
-// Ignore for now, not using
-/*const pantry = require('./pantry.js')
-const pantryClient = new pantry(process.env["Pantry-DB"]);
-
-// only basket rn is "chat"
-pantryClient.details().then(console.log)*/
-
 const express = require('express')
 const app = express();
+var path = require('path');
 const server = require('http').createServer(app);
 
 const { Server } = require("socket.io");
 
 const io = new Server(server, {
-  maxHttpBufferSize: 1e9 // 1 gb
+  maxHttpBufferSize: 1e10 // 10 gb
 })
-// changed server create a little to increase file size limit
 
 const port = process.env.PORT || 8080;
 
-const bodyParser = require('body-parser');
-const cors = require('cors');
-var path = require('path');
-
-const darken = require('./darkenColor.js')
-
-
-//app.use(cors());
-/*
-app.use(cors());
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
-app.use(bodyParser.json());*/
-
-function genColor (sed) {
-  let seed = "";
-  sed.split().forEach(a => {
-    seed = seed + a.charCodeAt(0)
-  })
-  seed = Number(seed)
-  color = Math.floor((Math.abs(Math.sin(seed) * 16777215)));
-  color = color.toString(16);
-  // pad any colors shorter than 6 characters with leading 0s
-  while(color.length < 6) {
-    color = '0' + color;
-  }
-
-  return color;
-}
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+});
 
 app.use('/images', express.static('images'))
-
-app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname, 'index.html'))
-});
-
-app.get('/style.css', function(req, res) {
-  res.sendFile(path.join(__dirname, 'style.css'))
-});
-
-app.get('/ping.mp3', function(req, res) {
-  res.sendFile(path.join(__dirname, 'ping.mp3'))
-});
+app.use('/', express.static('public'))
 
 app.get('/tenor', async function(req, res) {
   let data = await fetch('https://tenor.googleapis.com/v2/search?key='+process.env['tenor']+'&country=US&locale=US-en&limit=25&media_filter=gif&q='+req.query['q']);
@@ -69,46 +25,108 @@ app.get('/tenor', async function(req, res) {
   res.json(data)
 })
 
-io.on('connection', (socket) => {
-  io.emit("message", {
-    content: `<b style="color:#${genColor(socket.id)}">${(socket.handshake.query.username != '') ? `${socket.handshake.query.username}</b> <b style="color:${darken(-0.4, `#${genColor(socket.id)}`, false, true)}">(${socket.id})` : socket.id}</b> has connected`,
-    username: "Server",
-    auth: "server",
-    color: "888",
-    userCount: io.engine.clientsCount,
-    files: [],
-    time: new Date().getTime()
-  });
+app.use(function(req, res) {
+  res.status(404)
+  res.sendFile(path.join(__dirname, 'error.html'))
+})
 
-  // On message
-  // When send "message" to sever
-  socket.on('message', async(data) => {
-    // handle message here
-    let data2 = data;
-    
-    if (!data2.content.replaceAll(/ |\\n/g, "") && !data2.files.length) return;
-
-    data2["time"] = new Date().getTime();
-    data2["color"] = genColor(socket.id)
-    if (!data2.files) {
-      data2.files = [];
+io.of("/").adapter.on("join-room", (room, id) => {
+  io.to(room).emit('data', {
+    type: 'message',
+    auth: 'server',
+    data: {
+      content: `${id} joined ${room}`,
+      name: 'Server',
+      color: '888',
+      files: [],
+      time: new Date().getTime()
     }
-    data2["auth"] = "user";
-    data2["userCount"] = io.engine.clientsCount;
-    
-    // Send "message" to all clients
-    io.emit("message", data);
+  });
+});
+io.of("/").adapter.on("leave-room", (room, id) => {
+  io.to(room).emit('data', {
+    type: 'message',
+    auth: 'server',
+    data: {
+      content: `${id} left ${room}`,
+      name: 'Server',
+      color: '888',
+      files: [],
+      time: new Date().getTime()
+    }
+  });
+});
+
+io.on('connection', (socket) => {
+  socket.leave(socket.id)
+  socket.join('main')
+  io.emit('data', {
+    type: 'stats',
+    auth: 'server',
+    data: {
+      count: io.engine.clientsCount
+    }
+  })
+
+  function rome() {
+    return Array.from(io.sockets.adapter.sids.get(socket.id))[0]
+  }
+  
+  socket.on('data', async(data) => {
+    switch (data.type) {
+      case 'message':
+        if (!data.data.content.replaceAll(/ |\\n/g, "") && !data.data.files.length) return;
+        io.to(rome()).emit('data', {
+          type: 'message',
+          auth: 'user',
+          data: {
+            content: data.data.content,
+            name: data.data.name || 'Anonymous',
+            color: data.data.color,
+            id: socket.id,
+            files: data.data.files || [],
+            time: new Date().getTime()
+          }
+        })
+        if (data.data.content.toLowerCase().includes('fsh')) {
+          io.to(rome()).emit('data', {
+            type: 'message',
+            auth: 'bot',
+            data: {
+              content: 'fsh',
+              name: 'Fsh',
+              color: '888',
+              files: [],
+              time: new Date().getTime()
+            }
+          })
+        }
+        break;
+      case 'room':
+        io.sockets.adapter.sids.get(socket.id).forEach(k => socket.leave(k))
+        socket.join(data.data.room)
+        break;
+    }
   });
 
   socket.on('disconnect', () => {
-    io.emit("message", {
-      content: `<b style="color:#${genColor(socket.id)}">${(socket.handshake.query.username != '') ? `${socket.handshake.query.username}</b> <b style="color:${darken(-0.4, `#${genColor(socket.id)}`, false, true)}">(${socket.id})` : socket.id}</b> has disconnected`,
-      username: "Server",
-      auth: "server",
-      color: "888",
-      files: [],
-      userCount: io.engine.clientsCount,
-      time: new Date().getTime()
+    io.emit('data', {
+      type: 'stats',
+      auth: 'server',
+      data: {
+        count: io.engine.clientsCount
+      }
+    })
+    io.emit('data', {
+      type: 'message',
+      auth: 'server',
+      data: {
+        content: `${socket.id} left`,
+        name: 'Server',
+        color: '888',
+        files: [],
+        time: new Date().getTime()
+      }
     });
   });
 });

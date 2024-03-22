@@ -1,0 +1,7 @@
+rippkgs-index.sqlite
+.replit
+replit.nix
+node_modules
+.upm
+.git
+.config
