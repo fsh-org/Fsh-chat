@@ -3,6 +3,20 @@ let socket = io(window.location.origin, {
 });
 
 function send() {
+  if (document.getElementById('message').value == "!help") {
+    showMessage({
+      type: 'message',
+      auth: 'bot',
+      data: {
+        name: 'Server (Client)',
+        color: '888',
+        content: 'Commands: help, clear',
+        time: new Date().getTime(),
+        files: []
+      }
+    })
+    return;
+  }
   if (document.getElementById('message').value == "!clear") {
     document.getElementById("msg").innerHTML = `<i>Cleared chat</i><br>`;
     return;
@@ -43,9 +57,9 @@ function send() {
 function Markdown(txt, auth) {
   if (auth != 'server') {
     let ch = {
+      '&': '&amp;',
       "<": '&lt;',
-      ">": '&gt;',
-      '"': '&amp;'
+      ">": '&gt;'
     }
     Object.keys(ch).forEach(th => {
       txt = txt.replaceAll(th, ch[th])
@@ -59,92 +73,98 @@ function Markdown(txt, auth) {
   }
   return twemoji.parse(
     txt
-    // Bold
-    .replaceAll(/(?<!\\)\*\*.+?(?<!\\)\*\*/g, function(match) {
-      return "<b>"+match.replaceAll("**","")+"</b>"
-    })
-		// Italics
-    .replaceAll(/(?<!\\)\*.+?(?<!\\)\*/g, function(match) {
-      return "<i>"+match.replaceAll("*","")+"</i>"
-    })
-    // Underline
-    .replaceAll(/(?<!\\)__.+?(?<!\\)__/g, function(match) {
-      return "<u>"+match.replaceAll("__","")+"</u>"
-    })
-    // Italics 2
-    .replaceAll(/(?<!\\)_.+?(?<!\\)_/g, function(match) {
-      return "<i>"+match.replaceAll("_","")+"</i>"
-    })
-    // Strike through
-    .replaceAll(/(?<!\\)~~.+?(?<!\\)~~/g, function(match) {
-      return "<s>"+match.replaceAll("~~","")+"</s>"
-    })
-    // Supscript
-    .replaceAll(/(?<!\\)\^.+?(?<!\\)\^/g, function(match) {
-      return "<sup>"+match.replaceAll("^","")+"</sup>"
-    })
-    // Subscript
-    .replaceAll(/(?<!\\)~.+?(?<!\\)~/g, function(match) {
-      return "<sub>"+match.replaceAll("~","")+"</sub>"
-    })
-    // Blockquote
-    .replaceAll(/(?<!.)> .+/g, function(match) {
-      return "<label class=\"MDbq\">"+match.replace("> ","")+"</label>"
-    })
-    // Headings
-    .replaceAll(/(?:^|\\n)#{1,3} (.*?)(?:$|\\n)/g, function(match, g1) {
-      return `<h${match.split(' ')[0].split("#").length-1} class="MDhd">${match.split(' ').slice(1,match.split(' ').length).join(" ")}</h${match.split(' ')[0].split("#").length-1}>`
-    })
-    // Hotizontal rule
-    .replaceAll(/(?:^|\\n)-{3,}(?:$|\\n)/g, function(match){
-      return '<hr>'
-    })
-    // Code (one line)
-    .replaceAll(/(?<!\\)`.+?(?<!\\)`/g, function(match){
-      return '<pre><code><label class="MDcode">'+match.replaceAll('`','')+'</label></pre></code>'
-    })
-    // High light
-    .replaceAll(/(?<!\\)==.+?(?<!\\)==/g, function(match){
-      return '<label class="MDhl">'+match.replaceAll('==','')+'</label>'
-    })
-    // New line
-    .replaceAll('\\n','<br>')
-    // Colored text
-    .replaceAll(/(?<!\\)\[.+?:.+?(?<!\\)\]/g, function(match) {
-      let ttt = match.replaceAll(/\[|\]/g,"").split(":")
-      ttt[0] = ttt[0].slice(0,6).replaceAll(/[^0-9a-fA-F]/g,'')
-      return '<label style="color:#'+ttt[0]+'">'+ttt[1]+'</label>'
-    })
-		// render custom emojis
-		.replaceAll(/:(.+?):/g, function(match) {
-			let thing = match.replace(/:/g,'').toLowerCase()
-			let realEmoji, type;
-			for(let emoj in picker.customEmoji){
-				for(let cusmoji in picker.customEmoji[emoj].shortcodes) {
-					if(thing == picker.customEmoji[emoj].shortcodes[cusmoji]) {
-          	type = "custom";
-          	realEmoji = picker.customEmoji[emoj].url;
-					};
-				};
-				for(let emoj in emojiData){
-					for(let cusmoji in emojiData[emoj].shortcodes) {
-						if(thing == emojiData[emoj].shortcodes[cusmoji]) {
-							type = "real";
-							realEmoji = emojiData[emoj].emoji;
-						};
-					};
-				};
-			};
-			if(!realEmoji) return match;
-			if(type == "custom") {
-      	return `<img class="emoji" src="${realEmoji}"/>`;
-			} else {
-				return realEmoji
-			}
-		}), {
-      size: "svg",
-      ext: ".svg"
-    });
+      // New line
+      .replaceAll('\\n','\n')
+      // Bold
+      .replaceAll(/(?<!\\)\*\*.+?(?<!\\)\*\*/g, function(match) {
+        return "<b>"+match.replaceAll("**","")+"</b>"
+      })
+  		// Italics
+      .replaceAll(/(?<!\\)\*.+?(?<!\\)\*/g, function(match) {
+        return "<i>"+match.replaceAll("*","")+"</i>"
+      })
+      // Underline
+      .replaceAll(/(?<!\\)__.+?(?<!\\)__/g, function(match) {
+        return "<u>"+match.replaceAll("__","")+"</u>"
+      })
+      // Italics 2
+      .replaceAll(/(?<!\\)_.+?(?<!\\)_/g, function(match) {
+        return "<i>"+match.replaceAll("_","")+"</i>"
+      })
+      // Strike through
+      .replaceAll(/(?<!\\)~~.+?(?<!\\)~~/g, function(match) {
+        return "<s>"+match.replaceAll("~~","")+"</s>"
+      })
+      // Supscript
+      .replaceAll(/(?<!\\)\^.+?(?<!\\)\^/g, function(match) {
+        return "<sup>"+match.replaceAll("^","")+"</sup>"
+      })
+      // Subscript
+      .replaceAll(/(?<!\\)~.+?(?<!\\)~/g, function(match) {
+        return "<sub>"+match.replaceAll("~","")+"</sub>"
+      })
+      // Blockquote
+      .replaceAll(/(?<!.)&gt; .+/g, function(match) {
+        return "<label class=\"MDbq\">"+match.replace("&gt; ","")+"</label>"
+      })
+      // Headings
+      .replaceAll(/^#{1,3} (.*?)$/gm, function(match, g1) {
+        return `<h${match.split(' ')[0].split("#").length-1} class="MDhd">${g1}</h${match.split(' ')[0].split("#").length-1}>`
+      })
+      // Hotizontal rule
+      .replaceAll(/^[*-_]{3,}$/gm, function(match){
+        return '<hr>'
+      })
+      // Code (multiple line)
+      .replaceAll(/(?<!\\)```.+?\n[^¬]+?\n(?<!\\)```/g, function(match){
+        return '<pre><code class="MDcode">'+match.split('\n').slice(1, match.split('\n').length-1).join('\n')+'</pre></code>'
+      })
+      // Code (one line)
+      .replaceAll(/(?<!\\)`.+?(?<!\\)`/g, function(match){
+        return '<pre><code class="MDcode">'+match.replaceAll('`','')+'</pre></code>'
+      })
+      // High light
+      .replaceAll(/(?<!\\)==.+?(?<!\\)==/g, function(match){
+        return '<mark>'+match.replaceAll('==','')+'</mark>'
+      })
+      // Colored text
+      .replaceAll(/(?<!\\)\[.+?:.+?(?<!\\)\]/g, function(match) {
+        let ttt = match.replaceAll(/\[|\]/g,"").split(":")
+        ttt[0] = ttt[0].slice(0,6).replaceAll(/[^0-9a-fA-F]/g,'')
+        return '<label style="color:#'+ttt[0]+'">'+ttt[1]+'</label>'
+      })
+      // New line
+      .replaceAll('\n','<br>')
+  		// render custom emojis
+  		.replaceAll(/:(.+?):/g, function(match) {
+  			let thing = match.replace(/:/g,'').toLowerCase()
+  			let realEmoji, type;
+  			for(let emoj in picker.customEmoji){
+  				for(let cusmoji in picker.customEmoji[emoj].shortcodes) {
+  					if(thing == picker.customEmoji[emoj].shortcodes[cusmoji]) {
+            	type = "custom";
+            	realEmoji = picker.customEmoji[emoj].url;
+  					};
+  				};
+  				for(let emoj in emojiData){
+  					for(let cusmoji in emojiData[emoj].shortcodes) {
+  						if(thing == emojiData[emoj].shortcodes[cusmoji]) {
+  							type = "real";
+  							realEmoji = emojiData[emoj].emoji;
+  						};
+  					};
+  				};
+  			};
+  			if(!realEmoji) return match;
+  			if(type == "custom") {
+        	return `<img class="emoji" src="${realEmoji}"/>`;
+  			} else {
+  				return realEmoji
+  			}
+  		}), {
+        size: "svg",
+        ext: ".svg"
+      });
 }
 
 let last;
@@ -152,6 +172,7 @@ function showMessage(data) {
   let time = new Date(data.data.time);
   let final = (data.auth != 'user' || last != data.data.id ? `<b style="color:#${data.data.color}">${data.auth == 'server' ? '<i class="fa-solid fa-user-shield"></i> ' : data.auth == 'bot' ? '<i class="fa-solid fa-robot"></i> ' : ''}${data.data.name} <time>${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}</time></b><br>` : '')+`
 ${Markdown(data.data.content, data.auth)}
+${data.data.files.length ? '<br>' : ''}
 ${data.data.files.map(file => DataToElem(file)).join('')}
 <br>`
 
@@ -174,19 +195,6 @@ socket.on("data", (data) => {
       }
       break;
   }
-  /*
-  let tim = new Date(data.time);
-let fil ="";
-  if (data.files.length || false) {
-    if (data.content) {
-      fil = '<br>'
-    }
-    data.files.forEach(e=>{
-      fil += `<${tag(e)} src="${e}" onerror="this.remove()" style="max-width: 20vw;max-height: 20vh;">${tagend(e)}`
-    })
-  }
-  let 
-  */
 })
 
 socket.on("disconnect", (reason) => {
