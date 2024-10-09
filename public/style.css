@@ -16,7 +16,6 @@ body {
   font-size: clamp(1rem, 4.5vw, 2rem);
 }
 .list {
-  background: var(--bg-1);
   width: 100vw;
   height: 90vh;
   height: 90dvh;
@@ -81,7 +80,6 @@ time {
   display: flex;
   gap: 5px;
   padding: 5px;
-  background-color: var(--bg-1);
 }
 .bar i {
   font-size: 20px;

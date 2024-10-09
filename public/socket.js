@@ -10,7 +10,7 @@ function send() {
       data: {
         name: 'Server (Client)',
         color: '888',
-        content: 'Commands: help, clear',
+        content: 'Commands: help, clear, fsh',
         time: new Date().getTime(),
         files: []
       }
@@ -19,6 +19,10 @@ function send() {
   }
   if (document.getElementById('message').value == "!clear") {
     document.getElementById("msg").innerHTML = `<i>Cleared chat</i><br>`;
+    return;
+  }
+  if (document.getElementById('message').value == "!fsh") {
+    document.body.insertAdjacentHTML("beforeend", `<style>body{background:url('https://fsh.plus/fsh.gif')}</style>`);
     return;
   }
   ['igg','agg'].forEach(b => {
