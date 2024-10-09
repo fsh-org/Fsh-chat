@@ -22,7 +22,7 @@ function send() {
     return;
   }
   if (document.getElementById('message').value == "!fsh") {
-    document.body.inserAdjacentHTML("beforeend", `<style>body{background:url('https://fsh.plus/fsh.gif')}</style>`);
+    document.body.insertAdjacentHTML("beforeend", `<style>body{background:url('https://fsh.plus/fsh.gif')}</style>`);
     return;
   }
   ['igg','agg'].forEach(b => {
