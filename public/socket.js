@@ -34,7 +34,7 @@ function send() {
           name: 'Server (Client)',
           color: '888',
           content: 'Please refrain from using that language',
-          time: new Date().getTime(),
+          time: Date.now(),
           files: []
         }
       })

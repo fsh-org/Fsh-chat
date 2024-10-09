@@ -16,11 +16,11 @@
     <link rel="stylesheet" href="/style.css">
     
     <script src="https://kit.fontawesome.com/50eb963274.js" crossorigin="anonymous"></script>
-		<script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
     <script src="https://unpkg.com/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
   </head>
   <body>
-    <div class="logo">
+    <nav>
       <img src="https://fsh.plus/fsh.png" alt="Fsh logo">
       <h1 style="margin:0">Fsh chat</h1>
       <div style="width:2vw"></div>
@@ -28,9 +28,9 @@
       <input id="color" type="color" value="#8888ff" aria-label="Your name color">
       <div style="width:2vw"></div>
       <label id="Co"></label>
-    </div>
-    
-    <div class="list">
+    </nav>
+
+    <main>
       <div class="roomSide">
         <label>Rooms</label>
         <button>Main</button>
@@ -41,31 +41,32 @@
         <hr style="width:80%">
         <button>Custom</button>
       </div>
-      <div id="msg" class="messagesDiv">
-        <div class="divide">
-          <i class="disclosure">Only people currently conected will have access go your messages.</i>
+      <div class="list">
+        <div id="msg" class="messagesDiv">
+          <i class="disclosure">Only people conected can view your messages.</i>
+        </div>
+
+        <div class="filePreview" id="preview"></div>
+        <input id="files" type="file" multiple style="display:none">
+
+        <div class="bar">
+          <textarea id="message" rows="1" aria-label="Message" placeholder="Send a message"></textarea>
+          <button onclick="send()" aria-label="send"><i class="fa-solid fa-share"></i></button>
+          <button onclick="document.getElementById('files').click()" aria-label="add file"><i class="fa-solid fa-file-circle-plus"></i></button>
+          <button aria-label="gif" onclick="gifOpen()"><img alt="Rectangle that says GIF" src="/images/gif.svg"></button>
+          <button onclick="pickmoji()" aria-label="emoji picker"><i class="fa-solid fa-face-smile"></i></button>
+
+          <dialog id="gifPicker">
+            <input id="gifSearch" placeholder="Seach for gifs">
+            <div id="gifResult"></div>
+          </dialog>
+          <script src="gif.js"></script>
+
+          <emoji-picker class="dark" id="emojiPicker"></emoji-picker>
+          <script src="emoji.js"></script>
         </div>
       </div>
-    </div>
-    <div class="bar">
-      <textarea id="message" rows="1" aria-label="Message" placeholder="Send a message"></textarea>
-      <button onclick="send()" aria-label="send"><i class="fa-solid fa-share"></i></button>
-      <button onclick="document.getElementById('files').click()" aria-label="add file"><i class="fa-solid fa-file-circle-plus"></i></button>
-      <button aria-label="gif" onclick="gifOpen()"><img alt="Rectangle that says GIF" src="/images/gif.svg"></button>
-      <button onclick="pickmoji()" aria-label="emoji picker"><i class="fa-solid fa-face-smile"></i></button>
-      <!--<button aria-label="Markdown docs"><i class="fa-brands fa-markdown"></i></button>-->
-
-      <dialog id="gifPicker">
-        <input id="gifSearch" placeholder="Seach for gifs">
-        <div id="gifResult"></div>
-      </dialog>
-      <script src="gif.js"></script>
-
-      <emoji-picker class="dark" id="emojiPicker"></emoji-picker>
-      <script src="emoji.js"></script>
-    </div>
-    <div class="filePreview" id="preview"></div>
-    <input id="files" type="file" multiple style="display:none">
+    </main>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/socket.js"></script>

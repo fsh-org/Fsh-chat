@@ -10,4 +10,4 @@ Private and feature-full browser chat app.
 - File attachements
 - Real time
 
-![image](https://github.com/user-attachments/assets/a0e97146-6774-4037-b5ba-855c88fa7e69)
+![image](/images/preview.png)
