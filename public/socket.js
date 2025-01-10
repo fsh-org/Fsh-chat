@@ -167,7 +167,8 @@ function Markdown(txt, auth) {
   			}
   		}), {
         size: "svg",
-        ext: ".svg"
+        ext: ".svg",
+        base: 'https://raw.githubusercontent.com/twitter/twemoji/refs/heads/master/assets/'
       });
 }
 
