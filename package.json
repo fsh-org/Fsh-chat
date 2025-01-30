@@ -1,5 +1,5 @@
 {
-  "name": "Fsh Chat",
+  "name": "fsh-chat",
   "version": "1.0.0",
   "description": "A browser chat app with lots of features",
   "main": "index.js",
@@ -13,13 +13,10 @@
     "rooms",
     "uncensored"
   ],
-  "author": [
-    "frostzzone",
-    "inventionpro"
-  ],
+  "author": "frostzzone & inventionpro",
   "license": "",
   "dependencies": {
-    "express": "^4.21.1",
-    "socket.io": "^4.7.5"
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
   }
 }
