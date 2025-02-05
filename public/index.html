@@ -42,8 +42,16 @@
         <button>Custom</button>
       </div>
       <div class="list">
+        <dialog id="disclose">
+          <button onclick="this.parentElement.close()" class="modal-close">x</button>
+          <h1>Data privacy</h1>
+          <li>Messages are never stored anywhere</li>
+          <li>Only currently connected useres will have access to your messages during their session</li>
+          <li>No user data is logged or sent (with the exception of your nickname and color)</li>
+          <li>Everything is open and can be viewed in <a href="https://github.com/Fsh-org/Fsh-chat" target="_blank">github</a></li>
+        </dialog>
         <div id="msg" class="messagesDiv">
-          <i class="disclosure">Only people currently connected will be able to view your messages.</i>
+          <i class="disclosure">Only people currently connected will be able to view your messages.<button onclick="disclose()">Learn more</button></i>
         </div>
 
         <div class="filePreview" id="preview"></div>

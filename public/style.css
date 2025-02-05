@@ -7,6 +7,15 @@ body {
   height: 100vh;
   height: 100dvh;
 }
+.modal-close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+}
 
 nav {
   display: flex;
@@ -187,6 +196,11 @@ pre {
   text-align: center;
   margin: 0px auto;
   border-bottom: 1px var(--text-3) solid;
+}
+.disclosure button {
+  color: inherit;
+  border: none;
+  border-radius: 0;
 }
 
 #name {
