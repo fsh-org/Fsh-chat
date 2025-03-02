@@ -40,7 +40,6 @@ main {
   border-top: 1px solid var(--text-1);
   border-radius: 0;
   margin: 0px;
-  margin-bottom: 2px;
 }
 .roomSide {
   display: flex;
@@ -52,6 +51,7 @@ main {
   max-width: 180px;
   padding: 4px;
   border-right: 1px var(--text-1) solid;
+  transition: left 250ms;
   box-sizing: border-box;
 }
 .roomSide button {
@@ -191,6 +191,7 @@ pre {
 .disclosure {
   display: block;
   width: fit-content;
+  max-width: 75%;
   color: var(--text-3);
   font-size: 12px;
   text-align: center;
@@ -205,4 +206,30 @@ pre {
 
 #name {
   min-width: 0;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .mobile-hide {
+    display: none !important;
+  }
+  .mobile-show {
+    display: block !important;
+  }
+  input {
+    margin: 2px !important;
+  }
+  .roomSide {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -100vw;
+    width: 100vw;
+    max-width: unset;
+    height: 100vh;
+    border: none;
+    background-color: var(--bg-1);
+    z-index: 99999;
+  }
 }

@@ -189,7 +189,7 @@ socket.on("data", (data) => {
   console.log(data)
   switch (data.type) {
     case 'stats':
-      document.getElementById("Co").innerHTML=`<i class="fa-solid fa-user"></i> ${data.data.count}`
+      document.getElementById("Co").innerText = data.data.count;
       break;
     case 'message':
       showMessage(data)
@@ -219,7 +219,6 @@ socket.on("disconnect", (reason) => {
 // Field resize
 var map = {};
 document.getElementById("message").onkeydown = document.getElementById("message").onkeyup = function(e){
-  e = e || event;
   map[e.keyCode] = e.type == 'keydown';
   if (map[13] && !map[16]) {
     send()
@@ -229,7 +228,7 @@ document.getElementById("message").onkeydown = document.getElementById("message"
 }
 
 // Rooms
-document.querySelectorAll('.roomSide button').forEach(bb => {
+document.querySelectorAll('.roomSide > button').forEach(bb => {
   bb.onclick = function(){
     let rum = bb.innerHTML.toLowerCase();
     if (rum == 'custom') rum = prompt('Room id')
@@ -243,3 +242,17 @@ document.querySelectorAll('.roomSide button').forEach(bb => {
     });
   }
 })
+
+// Side bar
+function showSide() {
+  document.querySelector('.roomSide').style.display = 'flex';
+  setTimeout(()=>{
+    document.querySelector('.roomSide').style.left = '0vw';
+  }, 1)
+}
+function hideSide() {
+  document.querySelector('.roomSide').style.left = '-100vw';
+  setTimeout(()=>{
+    document.querySelector('.roomSide').style.display = 'none';
+  }, 250)
+}
