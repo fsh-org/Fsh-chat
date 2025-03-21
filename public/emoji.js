@@ -63,23 +63,23 @@ function insertAtCursor(myField, myValue) {
     + myValue
     + ' '
     + myField.value.substring(tempCursorPos, myField.value.length);
-  tempCursorPos += myValue.length+1
+  tempCursorPos += myValue.length+1;
 }
 
-//save pos
+// Save pos
 /* On key */
 mess.addEventListener('keyup', e => {
-  tempCursorPos = e.target.selectionStart
+  tempCursorPos = e.target.selectionStart;
 });
 /* On click */
 mess.addEventListener('mouseup', e => {
-  tempCursorPos = e.target.selectionStart
+  tempCursorPos = e.target.selectionStart;
 })
 
 picker.addEventListener('emoji-click', event => {
   if('url' in event.detail.emoji){
-    insertAtCursor(mess, `:${event.detail.emoji.name}:`)
+    insertAtCursor(mess, `:${event.detail.emoji.name}:`);
   } else {
-    insertAtCursor(mess, event.detail.emoji.unicode)
+    insertAtCursor(mess, event.detail.emoji.unicode);
   }
 });

@@ -116,7 +116,7 @@ function Markdown(txt, auth) {
         return `<h${match.split(' ')[0].split("#").length-1} class="MDhd">${g1}</h${match.split(' ')[0].split("#").length-1}>`
       })
       // Hotizontal rule
-      .replaceAll(/^[*-_]{3,}$/gm, function(match){
+      .replaceAll(/^[\*\-\_]{3,}$/gm, function(match){
         return '<hr>'
       })
       // Code (multiple line)
