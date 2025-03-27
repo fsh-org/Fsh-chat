@@ -120,7 +120,7 @@ function Markdown(txt, auth) {
         return '<hr>'
       })
       // Code (multiple line)
-      .replaceAll(/(?<!\\)```.+?\n[^¬]+?\n(?<!\\)```/g, function(match){
+      .replaceAll(/(?<!\\)```.+?\n([^¬]|¬)+?\n(?<!\\)```/g, function(match){
         return '<pre><code class="MDcode">'+match.split('\n').slice(1, match.split('\n').length-1).join('\n')+'</pre></code>'
       })
       // Code (one line)
@@ -133,9 +133,9 @@ function Markdown(txt, auth) {
       })
       // Colored text
       .replaceAll(/(?<!\\)\[.+?:.+?(?<!\\)\]/g, function(match) {
-        let ttt = match.replaceAll(/\[|\]/g,"").split(":")
-        ttt[0] = ttt[0].slice(0,6).replaceAll(/[^0-9a-fA-F]/g,'')
-        return '<label style="color:#'+ttt[0]+'">'+ttt[1]+'</label>'
+        let ttt = match.replaceAll(/\[|\]/g,"").split(":");
+        ttt[0] = ttt[0].replaceAll(/[^0-9a-fA-F]/g,'').slice(0,6);
+        return `<label style="color:#${ttt[0]}">${ttt.slice(1).join(':')}</label>`;
       })
       // New line
       .replaceAll('\n','<br>')
