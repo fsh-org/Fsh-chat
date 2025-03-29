@@ -41,7 +41,7 @@ picker.customEmoji = [
   },
   {
     name: 'Real Gun',
-    shortcodes: ['gun','rgun','rg'],
+    shortcodes: ['realgun', 'real gun', 'rgun','rg'],
     url: './images/gun.png'
   }
 ];

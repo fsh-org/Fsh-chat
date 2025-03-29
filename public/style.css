@@ -106,10 +106,12 @@ time {
 }
 
 #message {
-  resize: none;
-  margin: 0;
-  font-size: 135%;
   flex-grow: 1;
+  margin: 0px;
+  font-size: 100%;
+  font-family: 'Lexend';
+  font-weight: normal;
+  resize: none;
 }
 
 .emoji {
@@ -145,7 +147,7 @@ time {
   width: calc(100% - 20px);
 }
 #gifPicker > div {
-  overflow-y: auto;
+  overflow: hidden auto;
   transition: height 500ms;
 }
 
@@ -158,10 +160,10 @@ time {
 
 #emojiPicker {
   position: absolute;
-  bottom: 5vh;
-  right: 10px;
-  max-height: 85vh;
-  max-width: 95vw;
+  top: -400px;
+  right: 5px;
+  width: 382px;
+  height: 400px;
 }
 
 mark {
@@ -234,5 +236,9 @@ pre {
     border: none;
     background-color: var(--bg-1);
     z-index: 99999;
+  }
+  #gifPicker {
+    left: 0px;
+    width: 100%;
   }
 }
