@@ -3,7 +3,8 @@ let socket = io(window.location.origin, {
 });
 
 function send() {
-  if (document.getElementById('message').value == "!help") {
+  let message = document.getElementById('message').value;
+  if (message === "!help") {
     showMessage({
       type: 'message',
       auth: 'bot',
@@ -17,16 +18,16 @@ function send() {
     })
     return;
   }
-  if (document.getElementById('message').value == "!clear") {
+  if (message === "!clear") {
     document.getElementById("msg").innerHTML = `<i>Cleared chat</i><br>`;
     return;
   }
-  if (document.getElementById('message').value == "!fsh") {
+  if (message === "!fsh") {
     document.body.insertAdjacentHTML("beforeend", `<style>body{background:url('https://fsh.plus/fsh.gif')}</style>`);
     return;
   }
   ['igg','agg'].forEach(b => {
-    if (document.getElementById('message').value.toLowerCase().includes(b)) {
+    if (message.toLowerCase().includes(b)) {
       showMessage({
         type: 'message',
         auth: 'bot',
@@ -48,7 +49,7 @@ function send() {
       name: document.getElementById('name').value,
       color: document.getElementById('color').value.replace('#',''),
       content: document.getElementById('message').value.replaceAll("\n","\\n"),
-      files: (AtachementFiles||[]).filter(e => {return e != ''})||[]
+      files: (AtachementFiles??[]).filter(e=>e.length>0)??[]
     }
   });
   AtachementFiles = [];
@@ -69,10 +70,8 @@ function Markdown(txt, auth) {
       txt = txt.replaceAll(th, ch[th])
     })
   }
-  if (auth == 'server') {
-    if (((txt.match(/[a-zA-Z0-9\-\_]{20} joined/)||[])[0] || '').length) {
-      if (txt.startsWith(socket.id)) txt = txt.replace(/[a-zA-Z0-9\-\_]{20} joined/, '<b>You</b> joined')
-    }
+  if (auth === 'server') {
+    if (txt.startsWith(socket.id) && txt.match(/[a-zA-Z0-9\-\_]{20} joined/)) txt = txt.replace(/[a-zA-Z0-9\-\_]{20} joined/, '<b>You</b> joined');
     return txt;
   }
   return twemoji.parse(
@@ -179,14 +178,15 @@ function showMessage(data) {
 ${Markdown(data.data.content, data.auth)}
 ${data.data.files.length ? '<br>' : ''}
 ${data.data.files.map(file => DataToElem(file)).join('')}
-<br>`
+<br>`;
 
   last = data.data.id;
   document.getElementById("msg").insertAdjacentHTML("beforeend", final);
 }
 
+let ping = new Audio('./ping.mp3');
 socket.on("data", (data) => {
-  console.log(data)
+  console.log(data);
   switch (data.type) {
     case 'stats':
       document.getElementById("Co").innerText = data.data.count;
@@ -195,8 +195,7 @@ socket.on("data", (data) => {
       showMessage(data)
       document.getElementById("msg").scrollTop = document.getElementById("msg").scrollHeight;
       if (!document.hasFocus()) {
-        let ping = new Audio('./ping.mp3')
-        ping.play()
+        ping.play();
       }
       break;
   }
@@ -209,28 +208,31 @@ socket.on("disconnect", (reason) => {
     data: {
       name: 'Server (Client)',
       color: '888',
-      content: 'You have been disconnected ('+reason+')',
+      content: `You have been disconnected (${reason})`,
       time: new Date().getTime(),
       files: []
     }
   })
 })
 
-// Field resize
+// Send / New line
 var map = {};
 document.getElementById("message").onkeydown = document.getElementById("message").onkeyup = function(e){
   map[e.keyCode] = e.type == 'keydown';
   if (map[13] && !map[16]) {
-    send()
+    send();
     e.preventDefault();
   }
-  document.getElementById("message").attributes.rows.value = Math.min(Math.max(document.getElementById("message").value.split("\n").length, 1), 6);
 }
+// Field resize
+document.getElementById("message").oninput = function(event){
+  event.target.setAttribute('rows', Math.min(Math.max(event.target.value.split('\n').length, 1), 6));
+};
 
 // Rooms
-document.querySelectorAll('.roomSide > button').forEach(bb => {
-  bb.onclick = function(){
-    let rum = bb.innerHTML.toLowerCase();
+document.querySelectorAll('.roomSide > button').forEach(roombutton => {
+  roombutton.onclick = function(){
+    let rum = roombutton.innerHTML.toLowerCase();
     if (rum == 'custom') rum = prompt('Room id')
     document.getElementById("msg").innerHTML = '';
     socket.emit('data', {
@@ -241,7 +243,7 @@ document.querySelectorAll('.roomSide > button').forEach(bb => {
       }
     });
   }
-})
+});
 
 // Side bar
 function showSide() {
