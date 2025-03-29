@@ -119,6 +119,7 @@ time {
 }
 
 .bar {
+  position: relative;
   display: flex;
   gap: 5px;
   padding: 5px;
@@ -130,19 +131,21 @@ time {
 
 #gifPicker {
   position: absolute;
-  bottom: 5vh;
-  right: -58vw;
-  background-color: var(--bg-2);
+  top: -60px;
+  left: calc(60% - 5px);
+  width: 40%;
+  margin: 0px;
   border: 1px var(--bg-3) solid;
-  width: 38vw;
-  max-height: 65vh;
-  overflow-y: scroll;
+  background-color: var(--bg-2);
   z-index: 99999;
+  box-sizing: border-box;
+  transition: top 500ms;
 }
 #gifPicker input {
-  width: -webkit-fill-available;
+  width: calc(100% - 20px);
 }
-#gifPicker div {
+#gifPicker > div {
+  overflow-y: auto;
   transition: height 500ms;
 }
 

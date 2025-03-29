@@ -1,33 +1,45 @@
-let GS = document.getElementById('gifSearch');
-let GR = document.getElementById('gifResult');
-let GP = document.getElementById('gifPicker');
+// Elements
+let GifSearch = document.getElementById('gifSearch');
+let GifResult = document.getElementById('gifResult');
+let GifPicker = document.getElementById('gifPicker');
+
+// Open
 function gifOpen() {
-  GP.open ? GP.close() : GP.show()
+  GifPicker.open ? GifPicker.close() : GifPicker.show();
 }
-var GT;
 
-GS.onkeyup = function () {
-  clearTimeout(GT);
-  GT = setTimeout(GSF, 500);
+// Search after a bit of not writing
+let GifTimeout;
+GifSearch.onkeyup = function () {
+  clearTimeout(GifTimeout);
+  GifTimeout = setTimeout(GSF, 500);
 };
-GS.onkeydown = function () {
-  clearTimeout(GT);
+GifSearch.onkeydown = function () {
+  clearTimeout(GifTimeout);
 };
 
-let GLa = "";
-function GSF () {
-  if (GLa == GS.value) return;
-  GLa = GS.value;
-  GR.style.height = '0';
-  if (GS.value.length>0) {
-    fetch('./tenor?q='+GS.value).then(async res => {
-      res = await res.json()
-      res = res.results;
-      res = res.map(e=>{return `<img class="gif" src="${e.media_formats.gif.url}" alt="${e.content_description}" onclick="AtachementFiles.push('${e.media_formats.gif.url}');UFP()">`})
-      GR.innerHTML = '<br><br>'+res.join("");
-      GR.style.height = '65vh';
-    })
-  } else {
-    GR.innerHTML = ""
+let GifLast = '';
+function GSF() {
+  // If same, return
+  if (GifLast == GifSearch.value) return;
+  GifLast = GifSearch.value;
+
+  // Hide results
+  GifResult.style.height = '0';
+  GifPicker.style.top = '';
+
+  // If empty, remove inner
+  if (GifSearch.value.length<1) {
+    GifResult.innerHTML = '';
+    return;
   }
+
+  // Search
+  fetch('./tenor?q='+GifSearch.value)
+    .then(res=>res.json())
+    .then(res=>{
+      GifResult.innerHTML = res.results.map(e=>`<img class="gif" src="${e.media_formats.gif.url}" alt="${e.content_description}" onclick="AtachementFiles.push('${e.media_formats.gif.url}');UFP()">`).join('');
+      GifResult.style.height = '65vh';
+      GifPicker.style.top = 'calc(-60px - 65vh)';
+    })
 }
