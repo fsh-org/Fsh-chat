@@ -55,8 +55,8 @@ main {
   box-sizing: border-box;
 }
 .roomSide button {
-  height: 28px;
   min-width: 70%;
+  padding: 2px;
 }
 .list {
   display: flex;
