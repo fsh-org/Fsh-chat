@@ -171,17 +171,22 @@ function Markdown(txt, auth) {
       });
 }
 
-let last;
+const userIcons = {
+  server: '<i class="fa-solid fa-user-shield"></i>',
+  bot: '<i class="fa-solid fa-robot"></i>',
+  user: ''
+};
+let last = '';
 function showMessage(data) {
   let time = new Date(data.data.time);
-  let final = (data.auth != 'user' || last != data.data.id ? `<b style="color:#${data.data.color}">${data.auth == 'server' ? '<i class="fa-solid fa-user-shield"></i> ' : data.auth == 'bot' ? '<i class="fa-solid fa-robot"></i> ' : ''}${data.data.name} <time>${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}</time></b><br>` : '')+`
-${Markdown(data.data.content, data.auth)}
-${data.data.files.length ? '<br>' : ''}
-${data.data.files.map(file => DataToElem(file)).join('')}
-<br>`;
-
+  document.getElementById("msg").insertAdjacentHTML("afterbegin", `<div id="m-${data.data.id}">
+  ${(data.auth!=='user' || last!==data.data.id)?`<b style="color:#${data.data.color}">
+    ${userIcons[data.auth]??''} ${data.data.name} <time>${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}</time>
+  </b>`:''}
+  <span>${Markdown(data.data.content, data.auth)}</span>
+  ${data.data.files.length?`<div>${data.data.files.map(file => DataToElem(file)).join('')}</div>`:''}
+</div>`);
   last = data.data.id;
-  document.getElementById("msg").insertAdjacentHTML("beforeend", final);
 }
 
 let ping = new Audio('./ping.mp3');
@@ -192,8 +197,8 @@ socket.on("data", (data) => {
       document.getElementById("Co").innerText = data.data.count;
       break;
     case 'message':
-      showMessage(data)
-      document.getElementById("msg").scrollTop = document.getElementById("msg").scrollHeight;
+      showMessage(data);
+      //document.getElementById("msg").scrollTop = document.getElementById("msg").scrollHeight;
       if (!document.hasFocus()) {
         ping.play();
       }

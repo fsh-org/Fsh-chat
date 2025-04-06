@@ -64,23 +64,31 @@ main {
   flex: 1;
 }
 .messagesDiv {
+  display: flex;
+  flex-direction: column-reverse;
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 4px;
   word-break: break-word;
-  flex: 1;
+}
+.messagesDiv > div {
+  display: flex;
+  flex-direction: column;
 }
 time {
   font-size: 65%;
   color: var(--text-3);
 }
+.messagesDiv > div > span {
+  word-break: break-word;
+}
 .filePreview {
-  width: 85vw;
-  min-height: 0px;
-  max-height: 15vh;
-  overflow-y: auto;
-  border-radius: 0.5rem;
-  background-color: var(--bg-1);
+	min-height: 0px;
+	max-height: 15vh;
+	overflow-y: auto;
+	border-radius: 0.5rem;
+	background-color: var(--bg-1);
 }
 .FileOnPreview {
   max-height: 16vh;
@@ -88,7 +96,8 @@ time {
   display: inline-block;
 }
 .FOPImg {
-  height: 15vh;
+	height: 15vh;
+	width: fit-content;
 }
 .FOPDelete {
   position: absolute;
@@ -126,9 +135,13 @@ time {
   gap: 5px;
   padding: 5px;
 }
-.bar i {
-  font-size: 20px;
-  margin-top: 1px;
+.bar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0px;
+  width: 35px;
+  height: 35px;
 }
 
 #gifPicker {
