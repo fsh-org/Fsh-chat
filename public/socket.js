@@ -19,6 +19,7 @@ function send() {
     return;
   }
   if (message === "!clear") {
+    last = '';
     document.getElementById("msg").innerHTML = `<i>Cleared chat</i><br>`;
     return;
   }
@@ -176,7 +177,7 @@ const userIcons = {
   bot: '<i class="fa-solid fa-robot"></i>',
   user: ''
 };
-let last = '';
+var last = '';
 function showMessage(data) {
   let time = new Date(data.data.time);
   document.getElementById("msg").insertAdjacentHTML("afterbegin", `<div id="m-${data.data.id}">
@@ -198,7 +199,6 @@ socket.on("data", (data) => {
       break;
     case 'message':
       showMessage(data);
-      //document.getElementById("msg").scrollTop = document.getElementById("msg").scrollHeight;
       if (!document.hasFocus()) {
         ping.play();
       }
