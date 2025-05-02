@@ -39,31 +39,6 @@ ${DataToElem(file)}
 </div>`).join('');
 }
 
-function resizeBase64Img(base64, newWidth, newHeight) {
-return new Promise((resolve, reject)=>{
-  const canvas = document.createElement("canvas");
-  canvas.width = newWidth;
-  canvas.height = newHeight;
-  let context = canvas.getContext("2d");
-  let img = document.createElement("img");
-  img.src = base64;
-  img.onload = function () {
-    context.scale(newWidth/img.width, newHeight/img.height);
-    context.drawImage(img, 0, 0);
-    resolve(canvas.toDataURL());
-  }
-});
-}
-function sizeBase64Img(base64) {
-  return new Promise((resolve, reject)=>{
-    let img = document.createElement("img");
-    img.src = base64;
-    img.onload = function(){
-      resolve([img.width, img.height]);
-    }
-  });
-}
-
 let AtachementFiles = [];
 
 // Adding files
@@ -71,24 +46,13 @@ let fel = document.getElementById('files')
 fel.onchange = function(){
   Array.from(fel.files).forEach(file=>{
     // Read file
-    let dat = new FileReader();
-    dat.readAsDataURL(file);
-    dat.addEventListener("loadend", async() => {
-      let final = dat.result;
-      if ((file.type.includes('image/') && file.type.includes("gif")) || file.type.includes("video/") || file.type.includes("audio/")) {
-        // Normal, ignore
-      } else if (file.type.includes('image/')) {
-        // Images, try to compress
-        let size = await sizeBase64Img(dat.result)
-        let compress = await resizeBase64Img(dat.result, size[0]/2, size[1]/2)
-        // Is size smaller?
-        if (dat.result.length > compress.length) {
-          final = compress;
-        }
-      } else {
+    let data = new FileReader();
+    data.readAsDataURL(file);
+    data.addEventListener("loadend", ()=>{
+      if (!typeOpen[file.type.split('/')[0]]) {
         alert(`Unsuported file type ${file.type}`);
       }
-      AtachementFiles.push(final);
+      AtachementFiles.push(data.result);
       UFP();
     })
   });
