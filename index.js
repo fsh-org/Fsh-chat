@@ -1,3 +1,5 @@
+process.env = require('env.js');
+
 const express = require('express')
 const app = express();
 var path = require('path');
@@ -19,14 +21,26 @@ app.use((req, res, next) => {
 app.use('/images', express.static('images'))
 app.use('/', express.static('public'))
 
+let tenorCache = {};
 app.get('/tenor', async function(req, res) {
-  let data = await fetch('https://tenor.googleapis.com/v2/search?key='+process.env['tenor']+'&country=US&locale=US-en&limit=25&media_filter=gif&q='+req.query['q']);
+  let q = req.query['q'];
+  if (tenorCache[q]) {
+    if (tenorCache[q].time>Date.now()) {
+      res.json(tenorCache[q].data);
+      return;
+    }
+  }
+  let data = await fetch(`https://tenor.googleapis.com/v2/search?key=${process.env['tenor']}&country=US&locale=US-en&limit=25&media_filter=gif&q=${q}`);
   data = await data.json();
-  res.json(data)
+  tenorCache[q] = {
+    time: Date.now()+(24*60*60*1000), // 24 Hours
+    data
+  };
+  res.json(data);
 })
 
 app.use(function(req, res) {
-  res.status(404)
+  res.status(404);
   res.sendFile(path.join(__dirname, 'error.html'))
 })
 
