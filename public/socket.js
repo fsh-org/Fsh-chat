@@ -188,6 +188,7 @@ function showMessage(data) {
   ${data.data.files.length?`<div>${data.data.files.map(file => DataToElem(file)).join('')}</div>`:''}
 </div>`);
   last = data.data.id;
+  Array.from(document.querySelectorAll('img.FOPImg')).forEach(attach=>attach.onclick = zoomAtachment);
 }
 
 let ping = new Audio('./ping.mp3');

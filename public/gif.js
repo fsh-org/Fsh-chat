@@ -38,7 +38,7 @@ function GSF() {
   fetch('./tenor?q='+GifSearch.value)
     .then(res=>res.json())
     .then(res=>{
-      GifResult.innerHTML = res.results.map(e=>`<img class="gif" src="${e.media_formats.gif.url}" alt="${e.content_description}" onclick="AtachementFiles.push('${e.media_formats.gif.url}');UFP()">`).join('');
+      GifResult.innerHTML = res.results.map(e=>`<img class="gif" loading="lazy" src="${e.media_formats.gif.url}" alt="${e.content_description}" onclick="AtachementFiles.push('${e.media_formats.gif.url}');UFP()">`).join('');
       GifResult.style.height = '65vh';
       GifPicker.style.top = 'calc(-60px - 65vh)';
     })

@@ -99,6 +99,15 @@ time {
 	height: 15vh;
 	width: fit-content;
 }
+audio.FOPImg {
+  height: revert-layer;
+  width: revert-layer;
+}
+.in .FOPImg {
+  max-width: 75vw;
+  max-height: 60vh;
+  height: unset;
+}
 .FOPDelete {
   position: absolute;
   top: 2px;

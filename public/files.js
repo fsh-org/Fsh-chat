@@ -58,3 +58,9 @@ fel.onchange = function(){
   });
   fel.value = '';
 }
+
+// Zoom
+function zoomAtachment(evt) {
+  document.getElementById('zoomDialog').showModal();
+  document.querySelector('#zoomDialog .in').innerHTML = evt.target.outerHTML;
+}
