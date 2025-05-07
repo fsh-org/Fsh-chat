@@ -1,4 +1,4 @@
-process.env = require('env.js');
+process.env = require('./env.js');
 
 const express = require('express')
 const app = express();
@@ -30,7 +30,7 @@ app.get('/tenor', async function(req, res) {
       return;
     }
   }
-  let data = await fetch(`https://tenor.googleapis.com/v2/search?key=${process.env['tenor']}&country=US&locale=US-en&limit=25&media_filter=gif&q=${q}`);
+  let data = await fetch(`https://tenor.googleapis.com/v2/search?key=${process.env['tenor']}&country=US&locale=US-en&limit=50&media_filter=gif&q=${q}`);
   data = await data.json();
   tenorCache[q] = {
     time: Date.now()+(24*60*60*1000), // 24 Hours

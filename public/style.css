@@ -159,16 +159,19 @@ time {
 #gifPicker input {
   width: calc(100% - 20px);
 }
-#gifPicker > div {
+#gifResult {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-evenly;
   overflow: hidden auto;
   transition: height 500ms;
 }
-
 .gif {
-  max-height: 24vh;
-  max-width: 100%;
-  margin: 0px 5px;
+  max-width: 50%;
+  padding: 2px;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 #emojiPicker {

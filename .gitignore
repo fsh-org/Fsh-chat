@@ -2,3 +2,4 @@ node_modules
 .upm
 .git
 .config
+env.js
