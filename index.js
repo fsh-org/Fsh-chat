@@ -8,7 +8,9 @@ const server = require('http').createServer(app);
 const { Server } = require("socket.io");
 
 const io = new Server(server, {
-  maxHttpBufferSize: 1e10 // 10 gb
+  maxHttpBufferSize: 1e9, // 1 gb
+  pingInterval: 20000, // 20s
+  pingTimeout: 10000 // 10s
 })
 
 const port = process.env.PORT || 8080;
@@ -85,7 +87,7 @@ io.on('connection', (socket) => {
   function rome() {
     return Array.from(io.sockets.adapter.sids.get(socket.id))[0]
   }
-  
+
   socket.on('data', async(data) => {
     switch (data.type) {
       case 'message':
