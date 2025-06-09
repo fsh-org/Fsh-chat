@@ -42,7 +42,7 @@ ${DataToElem(file)}
 let AtachementFiles = [];
 
 // Adding files
-let fel = document.getElementById('files')
+let fel = document.getElementById('files');
 fel.onchange = function(){
   Array.from(fel.files).forEach(file=>{
     // Read file
@@ -58,6 +58,11 @@ fel.onchange = function(){
   });
   fel.value = '';
 }
+
+// Pasting files
+window.addEventListener('paste', (evt) => {
+  fel.files = evt.clipboardData.files;
+});
 
 // Zoom
 function zoomAtachment(evt) {
