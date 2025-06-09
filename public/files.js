@@ -62,6 +62,7 @@ fel.onchange = function(){
 // Pasting files
 window.addEventListener('paste', (evt) => {
   fel.files = evt.clipboardData.files;
+  fel.onchange();
 });
 
 // Zoom

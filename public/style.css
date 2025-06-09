@@ -76,6 +76,11 @@ main {
   display: flex;
   flex-direction: column;
 }
+.messagesDiv > div > b {
+  display: flex;
+  gap: 5px;
+  align-items: flex-end;
+}
 time {
   font-size: 65%;
   color: var(--text-3);

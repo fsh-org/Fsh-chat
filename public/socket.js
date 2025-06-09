@@ -3,78 +3,80 @@ let socket = io(window.location.origin, {
 });
 
 function send() {
+  // Save and clear
   let message = document.getElementById('message').value;
-  if (message === "!help") {
-    showMessage({
-      type: 'message',
-      auth: 'bot',
-      data: {
-        name: 'Server (Client)',
-        color: '888',
-        content: 'Commands: help, clear, fsh',
-        time: new Date().getTime(),
-        files: []
-      }
-    })
-    return;
+  document.getElementById('message').value = '';
+  document.getElementById('message').attributes.rows.value = 1;
+  // Commands
+  if ((/^![a-z]+$/m).test(message)) {
+    switch(message) {
+      case '!help':
+        showMessage({
+          type: 'message',
+          auth: 'bot',
+          data: {
+            id: '',
+            name: 'Server (Client)',
+            color: '888888',
+            content: 'Commands: help, clear, fsh',
+            time: new Date().getTime(),
+            files: [],
+            mid: ''
+          }
+        });
+        return;
+      case '!clear':
+        last = '';
+        document.getElementById('msg').innerHTML = `<i>Cleared chat</i><br>`;
+        return;
+      case '!fsh':
+        document.body.insertAdjacentHTML('beforeend', `<style>body{background:url('https://fsh.plus/fsh.gif')}</style>`);
+        return;
+    }
   }
-  if (message === "!clear") {
-    last = '';
-    document.getElementById("msg").innerHTML = `<i>Cleared chat</i><br>`;
-    return;
-  }
-  if (message === "!fsh") {
-    document.body.insertAdjacentHTML("beforeend", `<style>body{background:url('https://fsh.plus/fsh.gif')}</style>`);
-    return;
-  }
+  // Profanity
   ['igg','agg'].forEach(b => {
     if (message.toLowerCase().includes(b)) {
       showMessage({
         type: 'message',
         auth: 'bot',
         data: {
+          id: '',
           name: 'Server (Client)',
-          color: '888',
+          color: '888888',
           content: 'Please refrain from using that language',
           time: Date.now(),
-          files: []
+          files: [],
+          mid: ''
         }
-      })
+      });
       return;
     }
-  })
+  });
+  // Send to server
   socket.emit('data', {
     type: 'message',
     auth: 'user',
     data: {
       name: document.getElementById('name').value,
       color: document.getElementById('color').value.replace('#',''),
-      content: document.getElementById('message').value.replaceAll("\n","\\n"),
+      content: message.value.replaceAll('\n','\\n'),
       files: (AtachementFiles??[]).filter(e=>e.length>0)??[]
     }
   });
   AtachementFiles = [];
-  fel.value = '';
-  document.getElementById("preview").innerHTML = '';
-  document.getElementById('message').value = '';
-  document.getElementById("message").attributes.rows.value = 1;
+  document.getElementById('preview').innerHTML = '';
 }
 
-function Markdown(txt, auth) {
-  if (auth != 'server') {
-    let ch = {
-      '&': '&amp;',
-      "<": '&lt;',
-      ">": '&gt;'
-    }
-    Object.keys(ch).forEach(th => {
-      txt = txt.replaceAll(th, ch[th])
-    })
+function Markdown(txt) {
+  let ch = {
+    '&': '&amp;',
+    "<": '&lt;',
+    ">": '&gt;'
   }
-  if (auth === 'server') {
-    if (txt.startsWith(socket.id) && txt.match(/[a-zA-Z0-9\-\_]{20} joined/)) txt = txt.replace(/[a-zA-Z0-9\-\_]{20} joined/, '<b>You</b> joined');
-    return txt;
-  }
+  Object.keys(ch).forEach(th => {
+    txt = txt.replaceAll(th, ch[th])
+  })
   return twemoji.parse(
     txt
       // New line
@@ -163,7 +165,7 @@ function Markdown(txt, auth) {
   			if(type == "custom") {
         	return `<img class="emoji" src="${realEmoji}"/>`;
   			} else {
-  				return realEmoji
+  				return realEmoji;
   			}
   		}), {
         size: "svg",
@@ -172,19 +174,30 @@ function Markdown(txt, auth) {
       });
 }
 
+function styleMessageContent(txt, auth) {
+  switch(auth) {
+    case 'server':
+      if (txt.startsWith(socket.id) && txt.match(/[a-zA-Z0-9\-\_]{20} joined/)) txt = txt.replace(/[a-zA-Z0-9\-\_]{20} joined/, '<b>You</b> joined');
+      return txt;
+    default:
+      return Markdown(txt);
+  }
+}
+
 const userIcons = {
-  server: '<i class="fa-solid fa-user-shield"></i>',
+  server: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path fill-rule="evenodd" clip-rule="evenodd" d="M97 135.001C43.3945 135.199 0 178.715 0 232.367V253C0 254.657 1.34314 256 3 256H97.3672V256H185.294C186.788 256 188 254.788 188 253.293C188 252.104 187.224 251.055 186.087 250.706L181.055 249.162C177.001 247.919 173.069 246.305 169.31 244.342C160.751 239.871 153.026 233.959 146.474 226.865L144.183 224.386C139.573 219.394 135.484 213.946 131.978 208.125L131 206.5L126 196L122.879 188.354C118.33 177.21 115.831 165.335 115.501 153.303L115.08 137.918C115.035 136.294 113.706 135 112.081 135H97.3672H97V135.001Z"></path><circle cx="116.5" cy="61.5" r="47.5"></circle><path fill-rule="evenodd" clip-rule="evenodd" d="M191.603 115.112C192.088 115.207 192.564 115.362 193.019 115.578L202.664 120.149L217.432 127.148L217.678 127.265L217.934 127.359L243.537 136.758V145.922C243.537 161.5 239.597 176.824 232.083 190.47L231.711 191.146C228.193 197.536 223.879 203.454 218.872 208.758L217.518 210.193C212.115 215.917 205.834 220.742 198.911 224.487L194.687 226.772C193.714 227.298 192.669 227.633 191.603 227.776V115.112ZM198.158 104.734C193.294 102.429 187.653 102.422 182.783 104.714L173.044 109.299L158.423 116.182L129.018 126.906C126.605 127.786 125 130.08 125 132.648V141.569C125 162.051 130.538 182.152 141.027 199.744L141.861 201.142C144.845 206.147 148.279 210.869 152.121 215.249L154.376 217.821C160.532 224.839 167.911 230.681 176.153 235.063L180.548 237.399C186.758 240.7 194.21 240.673 200.396 237.327L204.62 235.042C212.666 230.69 219.966 225.082 226.244 218.43L227.599 216.995C233.302 210.953 238.216 204.212 242.223 196.934L242.595 196.258C251.085 180.839 255.537 163.524 255.537 145.922V132.653C255.537 130.087 253.935 127.793 251.526 126.908L222.325 116.188L207.804 109.306L198.158 104.734Z"></path></svg>',
   bot: '<i class="fa-solid fa-robot"></i>',
   user: ''
 };
+
 var last = '';
 function showMessage(data) {
   let time = new Date(data.data.time);
-  document.getElementById("msg").insertAdjacentHTML("afterbegin", `<div id="m-${data.data.id}">
+  document.getElementById('msg').insertAdjacentHTML('afterbegin', `<div id="m-${data.data.id}">
   ${(data.auth!=='user' || last!==data.data.id)?`<b style="color:#${data.data.color}">
     ${userIcons[data.auth]??''} ${data.data.name} <time>${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}</time>
   </b>`:''}
-  <span>${Markdown(data.data.content, data.auth)}</span>
+  <span>${styleMessageContent(data.data.content, data.auth)}</span>
   ${data.data.files.length?`<div>${data.data.files.map(file => DataToElem(file)).join('')}</div>`:''}
 </div>`);
   last = data.data.id;
@@ -192,7 +205,7 @@ function showMessage(data) {
 }
 
 let ping = new Audio('./ping.mp3');
-socket.on("data", (data) => {
+socket.on('data', (data) => {
   console.log(data);
   switch (data.type) {
     case 'stats':
@@ -200,30 +213,30 @@ socket.on("data", (data) => {
       break;
     case 'message':
       showMessage(data);
-      if (!document.hasFocus()) {
-        ping.play();
-      }
+      if (!document.hasFocus()) ping.play();
       break;
   }
 })
 
-socket.on("disconnect", (reason) => {
+socket.on('disconnect', (reason) => {
   showMessage({
     type: 'message',
     auth: 'bot',
     data: {
+      id: '',
       name: 'Server (Client)',
       color: '888',
       content: `You have been disconnected (${reason})`,
       time: new Date().getTime(),
-      files: []
+      files: [],
+      mid: ''
     }
   })
 })
 
 // Send / New line
 var map = {};
-document.getElementById("message").onkeydown = document.getElementById("message").onkeyup = function(e){
+document.getElementById('message').onkeydown = document.getElementById('message').onkeyup = function(e){
   map[e.keyCode] = e.type == 'keydown';
   if (map[13] && !map[16]) {
     send();
@@ -231,7 +244,7 @@ document.getElementById("message").onkeydown = document.getElementById("message"
   }
 }
 // Field resize
-document.getElementById("message").oninput = function(event){
+document.getElementById('message').oninput = function(event){
   event.target.setAttribute('rows', Math.min(Math.max(event.target.value.split('\n').length, 1), 6));
 };
 
@@ -240,7 +253,7 @@ document.querySelectorAll('.roomSide > button').forEach(roombutton => {
   roombutton.onclick = function(){
     let rum = roombutton.innerHTML.toLowerCase();
     if (rum == 'custom') rum = prompt('Room id')
-    document.getElementById("msg").innerHTML = '';
+    document.getElementById('msg').innerHTML = '';
     socket.emit('data', {
       type: 'room',
       auth: 'user',

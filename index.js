@@ -43,32 +43,40 @@ app.get('/tenor', async function(req, res) {
 
 app.use(function(req, res) {
   res.status(404);
-  res.sendFile(path.join(__dirname, 'error.html'))
+  res.sendFile(path.join(__dirname, 'public', 'error.html'));
 })
 
-io.of("/").adapter.on("join-room", (room, id) => {
+function mid() {
+  return Math.floor(Math.random()*Math.pow(10,16)).toString(16).padStart(14, '0');
+}
+
+io.of('/').adapter.on('join-room', (room, id) => {
   io.to(room).emit('data', {
     type: 'message',
     auth: 'server',
     data: {
-      content: `${id} joined ${room}`,
+      id: '',
       name: 'Server',
-      color: '888',
+      color: '888888',
+      content: `${id} joined ${room}`,
       files: [],
-      time: new Date().getTime()
+      time: new Date().getTime(),
+      mid: mid()
     }
   });
 });
-io.of("/").adapter.on("leave-room", (room, id) => {
+io.of('/').adapter.on('leave-room', (room, id) => {
   io.to(room).emit('data', {
     type: 'message',
     auth: 'server',
     data: {
-      content: `${id} left ${room}`,
+      id: '',
       name: 'Server',
-      color: '888',
+      color: '888888',
+      content: `${id} left ${room}`,
       files: [],
-      time: new Date().getTime()
+      time: new Date().getTime(),
+      mid: mid()
     }
   });
 });
@@ -85,23 +93,26 @@ io.on('connection', (socket) => {
   })
 
   function rome() {
-    return Array.from(io.sockets.adapter.sids.get(socket.id))[0]
+    return Array.from(io.sockets.adapter.sids.get(socket.id))[0];
   }
 
   socket.on('data', async(data) => {
     switch (data.type) {
       case 'message':
-        if (!data.data.content.replaceAll(/ |\\n/g, "") && !data.data.files.length) return;
+        // If empty leave
+        if (!data.data.content.trim() && !data.data.files.length) return;
+        // Send to all on same room
         io.to(rome()).emit('data', {
           type: 'message',
           auth: 'user',
           data: {
-            content: data.data.content,
+            id: socket.id,
             name: data.data.name || 'Anonymous',
             color: data.data.color,
-            id: socket.id,
+            content: data.data.content,
             files: data.data.files || [],
-            time: new Date().getTime()
+            time: new Date().getTime(),
+            mid: mid()
           }
         })
         if (data.data.content.toLowerCase().includes('fsh')) {
@@ -109,18 +120,20 @@ io.on('connection', (socket) => {
             type: 'message',
             auth: 'bot',
             data: {
-              content: 'fsh',
+              id: '',
               name: 'Fsh',
-              color: '888',
+              color: '888888',
+              content: 'fsh',
               files: [],
-              time: new Date().getTime()
+              time: new Date().getTime(),
+              mid: mid()
             }
           })
         }
         break;
       case 'room':
-        io.sockets.adapter.sids.get(socket.id).forEach(k => socket.leave(k))
-        socket.join(data.data.room)
+        io.sockets.adapter.sids.get(socket.id).forEach(k => socket.leave(k));
+        socket.join(data.data.room);
         break;
     }
   });
@@ -137,11 +150,13 @@ io.on('connection', (socket) => {
       type: 'message',
       auth: 'server',
       data: {
-        content: `${socket.id} left`,
+        id: '',
         name: 'Server',
-        color: '888',
+        color: '888888',
+        content: `${socket.id} left`,
         files: [],
-        time: new Date().getTime()
+        time: new Date().getTime(),
+        mid: mid()
       }
     });
   });
