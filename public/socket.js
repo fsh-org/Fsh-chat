@@ -60,7 +60,7 @@ function send() {
     data: {
       name: document.getElementById('name').value,
       color: document.getElementById('color').value.replace('#',''),
-      content: message.value.replaceAll('\n','\\n'),
+      content: message.replaceAll('\n','\\n'),
       files: (AtachementFiles??[]).filter(e=>e.length>0)??[]
     }
   });
