@@ -244,8 +244,9 @@ document.getElementById('message').onkeydown = document.getElementById('message'
   }
 }
 // Field resize
-document.getElementById('message').oninput = function(event){
-  event.target.setAttribute('rows', Math.min(Math.max(event.target.value.split('\n').length, 1), 6));
+document.getElementById('message').oninput = function(event) {
+  event.target.style.height = 'auto';
+  event.target.style.height = Math.min(event.target.scrollHeight-10, 20 * 6) + 'px';
 };
 
 // Rooms
