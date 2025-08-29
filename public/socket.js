@@ -2,11 +2,12 @@ let socket = io(window.location.origin, {
   path: "/socket.io"
 });
 
+const messageField = document.getElementById('message');
 function send() {
   // Save and clear
-  let message = document.getElementById('message').value;
-  document.getElementById('message').value = '';
-  document.getElementById('message').attributes.rows.value = 1;
+  let message = messageField.value;
+  messageField.value = '';
+  messageField.oninput();
   // Commands
   if ((/^![a-z]+$/m).test(message)) {
     switch(message) {
@@ -69,69 +70,11 @@ function send() {
 }
 
 function Markdown(txt) {
-  let ch = {
-    '&': '&amp;',
-    "<": '&lt;',
-    ">": '&gt;'
-  }
-  Object.keys(ch).forEach(th => {
-    txt = txt.replaceAll(th, ch[th])
-  })
   return twemoji.parse(
-    txt
-      // New line
-      .replaceAll('\\n','\n')
-      // Bold
-      .replaceAll(/(?<!\\)\*\*.+?(?<!\\)\*\*/g, function(match) {
-        return "<b>"+match.replaceAll("**","")+"</b>"
-      })
-  		// Italics
-      .replaceAll(/(?<!\\)\*.+?(?<!\\)\*/g, function(match) {
-        return "<i>"+match.replaceAll("*","")+"</i>"
-      })
-      // Underline
-      .replaceAll(/(?<!\\)__.+?(?<!\\)__/g, function(match) {
-        return "<u>"+match.replaceAll("__","")+"</u>"
-      })
-      // Italics 2
-      .replaceAll(/(?<!\\)_.+?(?<!\\)_/g, function(match) {
-        return "<i>"+match.replaceAll("_","")+"</i>"
-      })
-      // Strike through
-      .replaceAll(/(?<!\\)~~.+?(?<!\\)~~/g, function(match) {
-        return "<s>"+match.replaceAll("~~","")+"</s>"
-      })
-      // Supscript
-      .replaceAll(/(?<!\\)\^.+?(?<!\\)\^/g, function(match) {
-        return "<sup>"+match.replaceAll("^","")+"</sup>"
-      })
-      // Subscript
-      .replaceAll(/(?<!\\)~.+?(?<!\\)~/g, function(match) {
-        return "<sub>"+match.replaceAll("~","")+"</sub>"
-      })
-      // Blockquote
-      .replaceAll(/(?<!.)&gt; .+/g, function(match) {
-        return "<label class=\"MDbq\">"+match.replace("&gt; ","")+"</label>"
-      })
-      // Headings
-      .replaceAll(/^#{1,3} (.*?)$/gm, function(match, g1) {
-        return `<h${match.split(' ')[0].split("#").length-1} class="MDhd">${g1}</h${match.split(' ')[0].split("#").length-1}>`
-      })
+    window.MDParse(txt.replaceAll('\\n','\n'))
       // Hotizontal rule
       .replaceAll(/^[\*\-\_]{3,}$/gm, function(match){
         return '<hr>'
-      })
-      // Code (multiple line)
-      .replaceAll(/(?<!\\)```.+?\n([^¬]|¬)+?\n(?<!\\)```/g, function(match){
-        return '<pre><code class="MDcode">'+match.split('\n').slice(1, match.split('\n').length-1).join('\n')+'</pre></code>'
-      })
-      // Code (one line)
-      .replaceAll(/(?<!\\)`.+?(?<!\\)`/g, function(match){
-        return '<pre><code class="MDcode">'+match.replaceAll('`','')+'</pre></code>'
-      })
-      // High light
-      .replaceAll(/(?<!\\)==.+?(?<!\\)==/g, function(match){
-        return '<mark>'+match.replaceAll('==','')+'</mark>'
       })
       // Colored text
       .replaceAll(/(?<!\\)\[.+?:.+?(?<!\\)\]/g, function(match) {
@@ -139,8 +82,6 @@ function Markdown(txt) {
         ttt[0] = ttt[0].replaceAll(/[^0-9a-fA-F]/g,'').slice(0,6);
         return `<label style="color:#${ttt[0]}">${ttt.slice(1).join(':')}</label>`;
       })
-      // New line
-      .replaceAll('\n','<br>')
   		// render custom emojis
   		.replaceAll(/:(.+?):/g, function(match) {
   			let thing = match.replace(/:/g,'').toLowerCase()
@@ -234,20 +175,18 @@ socket.on('disconnect', (reason) => {
   })
 })
 
+// Field resize
+messageField.oninput = function(event) {
+  messageField.style.height = 'auto';
+  messageField.style.height = Math.min(messageField.scrollHeight-10, 20 * 6) + 'px';
+};
 // Send / New line
 var map = {};
-document.getElementById('message').onkeydown = document.getElementById('message').onkeyup = function(e){
-  map[e.keyCode] = e.type == 'keydown';
-  if (map[13] && !map[16]) {
-    send();
-    e.preventDefault();
-  }
+messageField.onkeydown = messageField.onkeyup = function(evt){
+  if (evt.key!=='Enter'||evt.shiftKey) return;
+  evt.preventDefault();
+  send();
 }
-// Field resize
-document.getElementById('message').oninput = function(event) {
-  event.target.style.height = 'auto';
-  event.target.style.height = Math.min(event.target.scrollHeight-10, 20 * 6) + 'px';
-};
 
 // Rooms
 document.querySelectorAll('.roomSide > button').forEach(roombutton => {

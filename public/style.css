@@ -87,6 +87,7 @@ time {
 }
 .messagesDiv > div > span {
   word-break: break-word;
+  white-space: break-spaces;
 }
 .filePreview {
 	min-height: 0px;
@@ -207,22 +208,29 @@ pre {
   margin: 2px 0px;
 }
 
-.MDbq::before {
-  content: "|";
-  margin-right: 6px;
-  color: #ccc;
-  background-color: #ccc;
-  border-radius: 0.5rem;
+blockquote {
+  position: relative;
+  display: inline;
+  margin: 0px;
+  margin-left: 8px;
 }
-
-.MDcode {
+blockquote::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  bottom: 0px;
+  left: -8px;
+  width: 4px;
+  height: calc(100% + 2px);
+  border-radius: 1rem;
+  background-color: var(--bg-4);
+}
+code {
+  display: inline;
+  font-family: ui-monospace, monospace;
   padding: 4px;
   border-radius: 0.25rem;
   background-color: var(--bg-0);
-}
-
-.MDhd {
-  margin: 0;
 }
 
 .disclosure {
