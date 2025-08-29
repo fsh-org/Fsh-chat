@@ -181,7 +181,6 @@ messageField.oninput = function(event) {
   messageField.style.height = Math.min(messageField.scrollHeight-10, 20 * 6) + 'px';
 };
 // Send / New line
-var map = {};
 messageField.onkeydown = messageField.onkeyup = function(evt){
   if (evt.key!=='Enter'||evt.shiftKey) return;
   evt.preventDefault();
