@@ -1,28 +1,37 @@
 process.env = require('./env.js');
 
-const express = require('express')
+// Packages
+const express = require('express');
+const path = require('node:path');
+const http = require('node:http');
+const crypto = require('node:crypto');
+const bodyParser = require('body-parser');
+const { WebSocketServer } = require('ws');
+
 const app = express();
-var path = require('path');
-const server = require('http').createServer(app);
+const server = http.createServer(app);
 
-const { Server } = require("socket.io");
+const port = process.env.PORT ?? 8080;
 
-const io = new Server(server, {
-  maxHttpBufferSize: 1e9, // 1 gb
-  pingInterval: 20000, // 20s
-  pingTimeout: 10000 // 10s
-})
-
-const port = process.env.PORT || 8080;
+const mid = ()=>Math.floor(Math.random()*Math.pow(16,12)).toString(16).padStart(12, '0');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
 });
 
-app.use('/images', express.static('images'))
-app.use('/', express.static('public'))
+app.use(bodyParser.raw({
+  limit: '100mb'
+}));
+app.use(bodyParser.json({
+  limit: '100mb'
+}));
 
+// Folders
+app.use('/images', express.static('images'));
+app.use('/', express.static('public'));
+
+// Apis
 let tenorCache = {};
 app.get('/tenor', async function(req, res) {
   let q = req.query['q'];
@@ -39,129 +48,196 @@ app.get('/tenor', async function(req, res) {
     data
   };
   res.json(data);
-})
+});
 
+// Chat api websockets
+const wss = new WebSocketServer({ noServer: true });
+
+let users = [];
+function sendUser(stream, type, data) {
+  data = JSON.stringify(data);
+  if (type==='ws') {
+    stream.send(data);
+  } else if (type==='sse') {
+    stream.write(`event: message\ndata: ${data}\n\n`);
+  }
+}
+function sendInRoom(room, data) {
+  users.forEach(user=>{
+    if (room!=='*'&&user.room!==room) return;
+    if (data.type==='message') {
+      data.data.time = new Date().getTime();
+      data.data.mid = mid();
+      data.data.id = crypto.createHash('sha256').update(data.data.id).digest('hex');
+    }
+    sendUser(user.stream, user.type, data);
+  });
+}
+
+function newUser(stream, type) {
+  let id = mid();
+
+  users.push({ id, stream, type, room: 'main' });
+  sendUser(stream, type, { type: 'welcome', data: id });
+  sendInRoom('main', {
+    type: 'message',
+    auth: 'server',
+    data: {
+      id: '',
+      name: 'Server',
+      color: '888888',
+      content: `${id} joined main`,
+      files: []
+    }
+  });
+  sendInRoom('*', { type: 'stats', data: users.length });
+
+  return id;
+}
+function leaveUser(id) {
+  let user = users.find(user=>user.id===id);
+  sendInRoom(user.room, {
+    type: 'message',
+    auth: 'server',
+    data: {
+      id: '',
+      name: 'Server',
+      color: '888888',
+      content: `${id} left`,
+      files: []
+    }
+  });
+  users = users.filter(user=>user.id!==id);
+  sendInRoom('*', { type: 'stats', data: users.length });
+}
+
+function handleMessage(data, id) {
+  let user = users.find(user=>user.id===id);
+  switch (data.type) {
+    case 'message':
+      // If empty leave
+      if (!data.data.content.trim() && !data.data.files.length) return;
+      // Send to all on same room
+      sendInRoom(user.room, {
+        type: 'message',
+        auth: 'user',
+        data: {
+          id,
+          name: data.data.name || 'Anonymous',
+          color: data.data.color,
+          content: data.data.content,
+          files: data.data.files || []
+        }
+      });
+      if (data.data.content.toLowerCase().includes('fsh')) {
+        sendInRoom(user.room, {
+          type: 'message',
+          auth: 'bot',
+          data: {
+            id: '',
+            name: 'Fsh',
+            color: '888888',
+            content: 'fsh',
+            files: []
+          }
+        });
+      }
+      break;
+    case 'room':
+      let lastroom = user.room;
+      users = users.map(user=>{
+        if (user.id!==id) return user;
+        user.room = data.data.room.replaceAll(/ |,|\./gi,'-').replaceAll(/[^a-zA-Z0-9_\-]/g,'');
+        return user;
+      });
+      user = users.find(user=>user.id===id);
+      sendInRoom(lastroom, {
+        type: 'message',
+        auth: 'server',
+        data: {
+          id: '',
+          name: 'Server',
+          color: '888888',
+          content: `${id} left ${lastroom}`,
+          files: []
+        }
+      });
+      sendInRoom(user.room, {
+        type: 'message',
+        auth: 'server',
+        data: {
+          id: '',
+          name: 'Server',
+          color: '888888',
+          content: `${id} joined ${user.room}`,
+          files: []
+        }
+      });
+      break;
+  }
+}
+
+wss.on('connection', (ws)=>{
+  let id = newUser(ws, 'ws');
+
+  ws.on('message', (raw)=>{
+    let data = JSON.parse(raw);
+    handleMessage(data, id);
+  });
+
+  ws.on('close', ()=>{
+    leaveUser(id);
+  });
+});
+
+// Pass the websockets
+server.on('upgrade', (request, socket, head) => {
+  if (request.url === '/ws') {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  } else {
+    socket.destroy();
+  }
+});
+
+// Chat api sse
+app.get('/sse', async function(req, res) {
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  let id = newUser(res, 'sse');
+
+  let heartBeat = setInterval(()=>{
+    res.write(`: Heartbeat\n\n`);
+  }, 30 * 1000); // 30 Seconds
+
+  res.on('close', () => {
+    clearInterval(heartBeat);
+    leaveUser(id);
+    res.end();
+  });
+});
+
+app.post('/sse', async function(req, res) {
+  if (!req.body || (typeof req.body!=='object') || !req.body.id) {
+    res.status(400);
+    res.json({ err: true, msg: 'Invalid body' });
+    return;
+  }
+  let id = req.body.id;
+  handleMessage(req.body, id);
+});
+
+// 404
 app.use(function(req, res) {
   res.status(404);
   res.sendFile(path.join(__dirname, 'public', 'error.html'));
-})
-
-function mid() {
-  return Math.floor(Math.random()*Math.pow(10,16)).toString(16).padStart(14, '0');
-}
-
-io.of('/').adapter.on('join-room', (room, id) => {
-  io.to(room).emit('data', {
-    type: 'message',
-    auth: 'server',
-    data: {
-      id: '',
-      name: 'Server',
-      color: '888888',
-      content: `${id} joined ${room}`,
-      files: [],
-      time: new Date().getTime(),
-      mid: mid()
-    }
-  });
-});
-io.of('/').adapter.on('leave-room', (room, id) => {
-  io.to(room).emit('data', {
-    type: 'message',
-    auth: 'server',
-    data: {
-      id: '',
-      name: 'Server',
-      color: '888888',
-      content: `${id} left ${room}`,
-      files: [],
-      time: new Date().getTime(),
-      mid: mid()
-    }
-  });
 });
 
-io.on('connection', (socket) => {
-  socket.leave(socket.id)
-  socket.join('main')
-  io.emit('data', {
-    type: 'stats',
-    auth: 'server',
-    data: {
-      count: io.engine.clientsCount
-    }
-  })
-
-  function rome() {
-    return Array.from(io.sockets.adapter.sids.get(socket.id))[0];
-  }
-
-  socket.on('data', async(data) => {
-    switch (data.type) {
-      case 'message':
-        // If empty leave
-        if (!data.data.content.trim() && !data.data.files.length) return;
-        // Send to all on same room
-        io.to(rome()).emit('data', {
-          type: 'message',
-          auth: 'user',
-          data: {
-            id: socket.id,
-            name: data.data.name || 'Anonymous',
-            color: data.data.color,
-            content: data.data.content,
-            files: data.data.files || [],
-            time: new Date().getTime(),
-            mid: mid()
-          }
-        })
-        if (data.data.content.toLowerCase().includes('fsh')) {
-          io.to(rome()).emit('data', {
-            type: 'message',
-            auth: 'bot',
-            data: {
-              id: '',
-              name: 'Fsh',
-              color: '888888',
-              content: 'fsh',
-              files: [],
-              time: new Date().getTime(),
-              mid: mid()
-            }
-          })
-        }
-        break;
-      case 'room':
-        io.sockets.adapter.sids.get(socket.id).forEach(k => socket.leave(k));
-        socket.join(data.data.room);
-        break;
-    }
-  });
-
-  socket.on('disconnect', () => {
-    io.emit('data', {
-      type: 'stats',
-      auth: 'server',
-      data: {
-        count: io.engine.clientsCount
-      }
-    })
-    io.emit('data', {
-      type: 'message',
-      auth: 'server',
-      data: {
-        id: '',
-        name: 'Server',
-        color: '888888',
-        content: `${socket.id} left`,
-        files: [],
-        time: new Date().getTime(),
-        mid: mid()
-      }
-    });
-  });
-});
-
-server.listen(port, function() {
+// Listen
+server.listen(port, ()=>{
   console.log(`Listening on port ${port}`);
 });

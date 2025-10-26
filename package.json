@@ -14,7 +14,8 @@
   "author": "frostzzone & inventionpro",
   "license": "",
   "dependencies": {
-    "express": "^4.21.2",
-    "socket.io": "^4.8.1"
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0",
+    "ws": "^8.18.3"
   }
 }

@@ -1,11 +1,9 @@
 body {
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  width: 100vw;
   width: 100dvw;
-  height: 100vh;
   height: 100dvh;
+  overflow: hidden;
 }
 .modal-close {
   position: absolute;
@@ -20,22 +18,20 @@ body {
 nav {
   display: flex;
   align-items: center;
-  height: 5vh;
+  height: 32px;
   overflow: hidden;
   box-sizing: border-box;
 }
 nav img {
-  width: 8vh;
-  max-width: 40px;
-  height: 8vh;
-  max-height: 40px;
+  height: 80%;
+  margin: 4px;
 }
 
 main {
   display: flex;
   flex: 1;
-  width: 100vw;
-  height: 95vh;
+  width: 100dvw;
+  height: 0px;
   box-sizing: border-box;
   border-top: 1px solid var(--text-1);
   border-radius: 0;
@@ -46,7 +42,7 @@ main {
   gap: 10px;
   align-items: center;
   flex-direction: column;
-  width: 15vw;
+  width: 15dvw;
   min-width: 60px;
   max-width: 180px;
   padding: 4px;
@@ -91,18 +87,18 @@ time {
 }
 .filePreview {
 	min-height: 0px;
-	max-height: 15vh;
+	max-height: 15dvh;
 	overflow-y: auto;
 	border-radius: 0.5rem;
 	background-color: var(--bg-1);
 }
 .FileOnPreview {
-  max-height: 16vh;
+  max-height: 16dvh;
   position: relative;
   display: inline-block;
 }
 .FOPImg {
-	height: 15vh;
+	height: 15dvh;
 	width: fit-content;
 }
 audio.FOPImg {
@@ -110,8 +106,8 @@ audio.FOPImg {
   width: revert-layer;
 }
 .in .FOPImg {
-  max-width: 75vw;
-  max-height: 60vh;
+  max-width: 75dvw;
+  max-height: 60dvh;
   height: unset;
 }
 .FOPDelete {
@@ -269,10 +265,10 @@ code {
     position: absolute;
     top: 0;
     bottom: 0;
-    left: -100vw;
-    width: 100vw;
+    left: -100dvw;
+    width: 100dvw;
     max-width: unset;
-    height: 100vh;
+    height: 100dvh;
     border: none;
     background-color: var(--bg-1);
     z-index: 99999;

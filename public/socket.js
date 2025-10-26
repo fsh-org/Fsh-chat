@@ -1,6 +1,58 @@
-let socket = io(window.location.origin, {
-  path: "/socket.io"
-});
+let socket;
+let socketType;
+let wsAttempts = 0;
+let wsMaxAttempts = 4;
+let sseHeartbeat;
+const ping = new Audio('./ping.mp3');
+
+function connect() {
+  if (sseHeartbeat) clearInterval(sseHeartbeat);
+  if (socket?.readyState > 1) socket.close();
+  if (wsAttempts<wsMaxAttempts) {
+    socketType = 'ws';
+    socket = new WebSocket(window.location.origin+'/ws');
+    socket.onclose = ()=>{
+      wsAttempts += 1;
+      showMessage({
+        type: 'message',
+        auth: 'bot',
+        data: {
+          id: '',
+          name: 'Server (Client)',
+          color: '808080',
+          content: `You have been disconnected`,
+          files: [],
+          time: new Date().getTime(),
+          mid: ''
+        }
+      });
+      connect();
+    };
+  } else {
+    socketType = 'sse';
+    socket = new EventSource(window.location.origin+'/sse');
+    sseHeartbeat = setInterval(()=>{
+      if (socket?.readyState > 1) connect();
+    }, 2 * 1000); // 2 Seconds
+  }
+  socket.onmessage = (msg) => {
+    let data = JSON.parse(msg.data);
+    console.log(data);
+    switch (data.type) {
+      case 'welcome':
+        socket.id = data.data;
+        break;
+      case 'stats':
+        document.getElementById('Co').innerText = data.data;
+        break;
+      case 'message':
+        showMessage(data);
+        if (!document.hasFocus()) ping.play();
+        break;
+    }
+  };
+}
+connect();
 
 const messageField = document.getElementById('message');
 function send() {
@@ -20,8 +72,8 @@ function send() {
             name: 'Server (Client)',
             color: '888888',
             content: 'Commands: help, clear, fsh',
-            time: new Date().getTime(),
             files: [],
+            time: new Date().getTime(),
             mid: ''
           }
         });
@@ -46,8 +98,8 @@ function send() {
           name: 'Server (Client)',
           color: '888888',
           content: 'Please refrain from using that language',
-          time: Date.now(),
           files: [],
+          time: Date.now(),
           mid: ''
         }
       });
@@ -55,9 +107,9 @@ function send() {
     }
   });
   // Send to server
-  socket.emit('data', {
+  let data = JSON.stringify({
+    id: socket.id,
     type: 'message',
-    auth: 'user',
     data: {
       name: document.getElementById('name').value,
       color: document.getElementById('color').value.replace('#',''),
@@ -65,6 +117,17 @@ function send() {
       files: (AtachementFiles??[]).filter(e=>e.length>0)??[]
     }
   });
+  if (socketType==='ws') {
+    socket.send(data);
+  } else if (socketType==='sse') {
+    fetch('/sse', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: data
+    });
+  }
   AtachementFiles = [];
   document.getElementById('preview').innerHTML = '';
 }
@@ -104,7 +167,7 @@ function Markdown(txt) {
   			};
   			if(!realEmoji) return match;
   			if(type == "custom") {
-        	return `<img class="emoji" src="${realEmoji}"/>`;
+        	return `<img class="emoji" src="${realEmoji}" alt="emoji">`;
   			} else {
   				return realEmoji;
   			}
@@ -118,7 +181,7 @@ function Markdown(txt) {
 function styleMessageContent(txt, auth) {
   switch(auth) {
     case 'server':
-      if (txt.startsWith(socket.id) && txt.match(/[a-zA-Z0-9\-\_]{20} joined/)) txt = txt.replace(/[a-zA-Z0-9\-\_]{20} joined/, '<b>You</b> joined');
+      if (txt.startsWith(socket.id) && txt.match(/[a-zA-Z0-9]{12} joined/)) txt = txt.replace(/[a-zA-Z0-9]{12} joined/, '<b>You</b> joined');
       return txt;
     default:
       return Markdown(txt);
@@ -145,38 +208,8 @@ function showMessage(data) {
   Array.from(document.querySelectorAll('img.FOPImg')).forEach(attach=>attach.onclick = zoomAtachment);
 }
 
-let ping = new Audio('./ping.mp3');
-socket.on('data', (data) => {
-  console.log(data);
-  switch (data.type) {
-    case 'stats':
-      document.getElementById("Co").innerText = data.data.count;
-      break;
-    case 'message':
-      showMessage(data);
-      if (!document.hasFocus()) ping.play();
-      break;
-  }
-})
-
-socket.on('disconnect', (reason) => {
-  showMessage({
-    type: 'message',
-    auth: 'bot',
-    data: {
-      id: '',
-      name: 'Server (Client)',
-      color: '888',
-      content: `You have been disconnected (${reason})`,
-      time: new Date().getTime(),
-      files: [],
-      mid: ''
-    }
-  })
-})
-
 // Field resize
-messageField.oninput = function(event) {
+messageField.oninput = function() {
   messageField.style.height = 'auto';
   messageField.style.height = Math.min(messageField.scrollHeight-10, 20 * 6) + 'px';
 };
@@ -190,16 +223,15 @@ messageField.onkeydown = messageField.onkeyup = function(evt){
 // Rooms
 document.querySelectorAll('.roomSide > button').forEach(roombutton => {
   roombutton.onclick = function(){
-    let rum = roombutton.innerHTML.toLowerCase();
-    if (rum == 'custom') rum = prompt('Room id')
+    let room = roombutton.innerHTML.toLowerCase();
+    if (room == 'custom') room = prompt('Room id')
     document.getElementById('msg').innerHTML = '';
-    socket.emit('data', {
+    socket.send(JSON.stringify({
       type: 'room',
-      auth: 'user',
       data: {
-        room: rum
+        room
       }
-    });
+    }));
   }
 });
 
