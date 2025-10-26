@@ -114,15 +114,11 @@ audio.FOPImg {
   position: absolute;
   top: 2px;
   right: 2px;
+  width: 30px;
+  height: 30px;
+  padding: 2px;
+  background-color: #000a;
   z-index: 10;
-  background-color: #0008;
-}
-.FOPIcon {
-  position: absolute;
-  left: 0;
-  top: 0;
-  box-shadow: 0px 0px 10px 5px rgba(0,0,0,0.75);
-  background-color: rgba(0,0,0,0.75);
 }
 
 #message {
