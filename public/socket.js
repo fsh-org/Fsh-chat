@@ -141,39 +141,15 @@ function Markdown(txt) {
       })
       // Colored text
       .replaceAll(/(?<!\\)\[.+?:.+?(?<!\\)\]/g, function(match) {
-        let ttt = match.replaceAll(/\[|\]/g,"").split(":");
+        let ttt = match.replaceAll(/\[|\]/g,'').split(':');
         ttt[0] = ttt[0].replaceAll(/[^0-9a-fA-F]/g,'').slice(0,6);
         return `<label style="color:#${ttt[0]}">${ttt.slice(1).join(':')}</label>`;
       })
   		// render custom emojis
-  		.replaceAll(/:(.+?):/g, function(match) {
-  			let thing = match.replace(/:/g,'').toLowerCase()
-  			let realEmoji, type;
-  			for(let emoj in picker.customEmoji){
-  				for(let cusmoji in picker.customEmoji[emoj].shortcodes) {
-  					if(thing == picker.customEmoji[emoj].shortcodes[cusmoji]) {
-            	type = "custom";
-            	realEmoji = picker.customEmoji[emoj].url;
-  					};
-  				};
-  				for(let emoj in emojiData){
-  					for(let cusmoji in emojiData[emoj].shortcodes) {
-  						if(thing == emojiData[emoj].shortcodes[cusmoji]) {
-  							type = "real";
-  							realEmoji = emojiData[emoj].emoji;
-  						};
-  					};
-  				};
-  			};
-  			if(!realEmoji) return match;
-  			if(type == "custom") {
-        	return `<img class="emoji" src="${realEmoji}" alt="emoji">`;
-  			} else {
-  				return realEmoji;
-  			}
-  		}), {
-        size: "svg",
-        ext: ".svg",
+  		.replaceAll(/:([a-zA-Z0-9_<!%&\?\*\+\.\- ]+?):/g, (match,g1)=>emojiShort[g1.toLowerCase()]?(emojiShort[g1.toLowerCase()].startsWith('./')?`<img class="emoji" src="${emojiShort[g1.toLowerCase()]}" alt="emoji">`:emojiShort[g1.toLowerCase()]):match),
+      {
+        size: 'svg',
+        ext: '.svg',
         base: 'https://raw.githubusercontent.com/twitter/twemoji/refs/heads/master/assets/'
       });
 }

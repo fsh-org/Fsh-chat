@@ -1,7 +1,7 @@
 let picker = document.getElementById('emojiPicker');
 let mess = document.getElementById('message');
 let tempCursorPos = 0, emojiData;
-picker.style.display = "none";
+picker.style.display = 'none';
 
 picker.customEmoji = [
   {
@@ -46,17 +46,19 @@ picker.customEmoji = [
   }
 ];
 
-(async()=>{
-  let res = await fetch("https://cdn.jsdelivr.net/npm/emoji-picker-element-data@%5E1/en/emojibase/data.json");
-  emojiData = await res.json();
-})()
+fetch('https://cdn.jsdelivr.net/npm/emoji-picker-element-data@1/en/emojibase/data.json')
+  .then(res=>res.json())
+  .then(res=>{
+    emojiData = res.concat(picker.customEmoji);
+    window.emojiShort = {};
+    emojiData.forEach(emoji=>{
+      emoji.shortcodes.forEach(sc=>window.emojiShort[sc]=emoji.url??emoji.emoji);
+      if(emoji.tags) emoji.tags.forEach(tag=>{if(!window.emojiShort[tag]&&Number.isNaN(Number(tag)))window.emojiShort[tag]=emoji.emoji});
+    });
+  });
 
 function pickmoji() {
-  if (picker.style.display == "") {
-    picker.style.display = "none";
-  } else {
-    picker.style.display = "";
-  }
+  picker.style.display=picker.style.display===''?'none':'';
 };
 function insertAtCursor(myField, myValue) {
   myField.value = myField.value.substring(0, tempCursorPos)
