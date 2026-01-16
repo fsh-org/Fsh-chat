@@ -60,28 +60,22 @@ fetch('https://cdn.jsdelivr.net/npm/emoji-picker-element-data@1/en/emojibase/dat
 function pickmoji() {
   picker.style.display=picker.style.display===''?'none':'';
 };
-function insertAtCursor(myField, myValue) {
-  myField.value = myField.value.substring(0, tempCursorPos)
+function insertAtCursor(myValue) {
+  mess.value = mess.value.substring(0, tempCursorPos)
     + myValue
     + ' '
-    + myField.value.substring(tempCursorPos, myField.value.length);
+    + mess.value.substring(tempCursorPos, mess.value.length);
   tempCursorPos += myValue.length+1;
 }
 
 // Save pos
-/* On key */
-mess.addEventListener('keyup', e => {
-  tempCursorPos = e.target.selectionStart;
+mess.addEventListener('keyup', (evt)=>{
+  tempCursorPos = evt.target.selectionStart;
 });
-/* On click */
-mess.addEventListener('mouseup', e => {
-  tempCursorPos = e.target.selectionStart;
-})
+mess.addEventListener('mouseup', (evt)=>{
+  tempCursorPos = evt.target.selectionStart;
+});
 
-picker.addEventListener('emoji-click', event => {
-  if('url' in event.detail.emoji){
-    insertAtCursor(mess, `:${event.detail.emoji.name}:`);
-  } else {
-    insertAtCursor(mess, event.detail.emoji.unicode);
-  }
+picker.addEventListener('emoji-click', (event)=>{
+  insertAtCursor(event.detail.emoji.url?`:${event.detail.name}:`:event.detail.unicode);
 });
