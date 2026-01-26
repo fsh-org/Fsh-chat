@@ -184,11 +184,22 @@ audio.FOPImg {
 }
 
 #emojiPicker {
+  --background: var(--bg-2);
+  --border-color: var(--bg-3);
+  --input-border-color: var(--text-2);
+  --input-font-color: var(--text-1);
+  --input-placeholder-color: var(--text-2);
+  --outline-color: var(--text-1);
+  --category-font-color: var(--text-1);
+  --button-active-background: var(--bg-3);
+  --button-hover-background: var(--bg-3);
+  --border-radius: 0.5rem;
   position: absolute;
   top: -400px;
   right: 5px;
   width: 382px;
   height: 400px;
+  z-index: 99;
 }
 
 mark {
