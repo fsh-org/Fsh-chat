@@ -201,7 +201,7 @@ document.querySelectorAll('.roomSide > button').forEach(roombutton => {
   roombutton.onclick = function(){
     let room = roombutton.innerHTML.toLowerCase();
     if (room === 'custom') room = prompt('Room id');
-    hideSide();
+    if (window.matchMedia('(max-width: 700px)').matches) hideSide();
     document.getElementById('msg').innerHTML = '';
     socket.send(JSON.stringify({
       type: 'room',
