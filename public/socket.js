@@ -200,7 +200,8 @@ messageField.onkeydown = messageField.onkeyup = function(evt){
 document.querySelectorAll('.roomSide > button').forEach(roombutton => {
   roombutton.onclick = function(){
     let room = roombutton.innerHTML.toLowerCase();
-    if (room == 'custom') room = prompt('Room id')
+    if (room === 'custom') room = prompt('Room id');
+    hideSide();
     document.getElementById('msg').innerHTML = '';
     socket.send(JSON.stringify({
       type: 'room',
