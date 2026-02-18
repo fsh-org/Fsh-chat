@@ -14,8 +14,8 @@
   "author": "frostzzone & inventionpro",
   "license": "",
   "dependencies": {
-    "body-parser": "^2.2.1",
+    "body-parser": "^2.2.2",
     "express": "^5.2.1",
-    "ws": "^8.18.3"
+    "ws": "^8.19.0"
   }
 }
