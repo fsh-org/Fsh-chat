@@ -5,6 +5,9 @@ let wsMaxAttempts = 4;
 let sseHeartbeat;
 const ping = new Audio('./ping.mp3');
 
+const messageField = document.getElementById('message');
+const replytobar = document.getElementById('replyto');
+
 function connect() {
   if (sseHeartbeat) clearInterval(sseHeartbeat);
   if (socket?.readyState > 1) socket.close();
@@ -54,10 +57,10 @@ function connect() {
 }
 connect();
 
-const messageField = document.getElementById('message');
 function send() {
   // Save and clear
-  let message = messageField.value;
+  let message = messageField.value.trim();
+  if ((message.length+AtachementFiles.length)<1) return;
   messageField.value = '';
   messageField.oninput();
   // Commands
@@ -113,8 +116,9 @@ function send() {
     data: {
       name: document.getElementById('name').value,
       color: document.getElementById('color').value.replace('#',''),
-      content: message.replaceAll('\n','\\n'),
-      files: (AtachementFiles??[]).filter(e=>e.length>0)??[]
+      content: message,
+      files: (AtachementFiles??[]).filter(e=>e.length>0)??[],
+      reply: replyto
     }
   });
   if (socketType==='ws') {
@@ -130,15 +134,15 @@ function send() {
   }
   AtachementFiles = [];
   document.getElementById('preview').innerHTML = '';
+  replyto = null;
+  replytobar.style.display = 'none';
 }
 
 function Markdown(txt) {
   return twemoji.parse(
-    window.MDParse(txt.replaceAll('\\n','\n'))
+    window.MDParse(txt)
       // Hotizontal rule
-      .replaceAll(/^[\*\-\_]{3,}$/gm, function(match){
-        return '<hr>'
-      })
+      .replaceAll(/^[\*\-\_]{3,}$/gm, '<hr>')
       // Colored text
       .replaceAll(/(?<!\\)\[.+?:.+?(?<!\\)\]/g, function(match) {
         let ttt = match.replaceAll(/\[|\]/g,'').split(':');
@@ -170,17 +174,30 @@ const userIcons = {
   user: ''
 };
 
-var last = '';
-function showMessage(data) {
-  let time = new Date(data.data.time);
-  document.getElementById('msg').insertAdjacentHTML('afterbegin', `<div id="m-${data.data.id}">
-  ${(data.auth!=='user' || last!==data.data.id)?`<b style="color:#${data.data.color}">
-    ${userIcons[data.auth]??''} ${data.data.name} <time>${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}</time>
+let messageData = {};
+let last = '';
+let replyto = null;
+window.reply = (id, name)=>{
+  replyto = id;
+  replytobar.style.display = '';
+  replytobar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path d="M256 132C256 120.954 247.046 112 236 112H60V112C26.8629 112 0 138.863 0 172V172V236C0 247.046 8.95431 256 20 256V256C31.0457 256 40 247.046 40 236V172V172C40 160.954 48.9543 152 60 152V152H236C247.046 152 256 143.046 256 132V132Z"/></svg>Replying to ${name}`;
+  messageField.focus();
+};
+function showMessage(msg) {
+  messageData[msg.data.mid] = msg;
+  let time = new Date(msg.data.time);
+  document.getElementById('msg').insertAdjacentHTML('afterbegin', `<div id="m-${msg.data.id}">
+  <div class="actions">
+    ${msg.data.mid?`<button onclick="window.reply('${msg.data.mid}', '${msg.data.name}')" aria-label="Reply"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path d="M42 108H196V108C229.137 108 256 134.863 256 168V168V199.85C256 210.896 247.046 219.85 236 219.85V219.85C224.954 219.85 216 210.896 216 199.85V168V168C216 156.954 207.046 148 196 148V148H42V108Z"/><path d="M79.746 41.1778C83.0613 37.8625 87.5578 36 92.2464 36V36C107.996 36 115.883 55.0415 104.747 66.1782L47.2462 123.681C44.9032 126.024 44.9032 129.823 47.2462 132.166L104.747 189.67C115.883 200.806 107.996 219.848 92.2464 219.848V219.848C87.5579 219.848 83.0614 217.985 79.7461 214.67L5.72793 140.652C-1.30151 133.622 -1.30151 122.225 5.72793 115.196L79.746 41.1778Z"/></svg></button>`:''}
+  </div>
+  ${msg.data.reply?`<div class="reply"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path d="M256 132C256 120.954 247.046 112 236 112H60V112C26.8629 112 0 138.863 0 172V172V236C0 247.046 8.95431 256 20 256V256C31.0457 256 40 247.046 40 236V172V172C40 160.954 48.9543 152 60 152V152H236C247.046 152 256 143.046 256 132V132Z"/></svg> ${messageData[msg.data.reply].data.name}: ${messageData[msg.data.reply].data.content}</div>`:''}
+  ${(msg.auth!=='user' || last!==msg.data.id || msg.data.reply)?`<b style="color:#${msg.data.color}">
+    ${userIcons[msg.auth]??''} ${msg.data.name} <time>${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}</time>
   </b>`:''}
-  <span>${styleMessageContent(data.data.content, data.auth)}</span>
-  ${data.data.files.length?`<div>${data.data.files.map(file => DataToElem(file)).join('')}</div>`:''}
+  <span>${styleMessageContent(msg.data.content, msg.auth)}</span>
+  ${msg.data.files.length?`<div>${msg.data.files.map(file => DataToElem(file)).join('')}</div>`:''}
 </div>`);
-  last = data.data.id;
+  last = msg.data.id;
   Array.from(document.querySelectorAll('img.FOPImg')).forEach(attach=>attach.onclick = zoomAtachment);
 }
 
@@ -205,9 +222,7 @@ document.querySelectorAll('.roomSide > button').forEach(roombutton => {
     document.getElementById('msg').innerHTML = '';
     socket.send(JSON.stringify({
       type: 'room',
-      data: {
-        room
-      }
+      data: { room }
     }));
   }
 });

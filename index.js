@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 const port = process.env.PORT ?? 8080;
 
-const mid = ()=>Math.floor(Math.random()*Math.pow(16,12)).toString(16).padStart(12, '0');
+const mid = ()=>crypto.randomBytes(6).toString('hex').padStart(12, '0');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -44,7 +44,7 @@ app.get('/tenor', async function(req, res) {
   let data = await fetch(`https://tenor.googleapis.com/v2/search?key=${process.env['tenor']}&country=US&locale=US-en&limit=50&media_filter=gif&q=${q}`);
   data = await data.json();
   tenorCache[q] = {
-    time: Date.now()+(24*60*60*1000), // 24 Hours
+    time: Date.now()+(2*24*60*60*1000), // 2 Days
     data
   };
   res.json(data);
@@ -74,39 +74,40 @@ function sendInRoom(room, data) {
   });
 }
 
+function newmessage(data, auth) {
+  return {
+    type: 'message',
+    auth: auth,
+    data: {
+      id: data.id||mid(),
+      name: data.name||'Anonymous',
+      color: data.color||'888888',
+      content: data.content||'',
+      files: data.files||[],
+      reply: data.reply||null
+    }
+  };
+}
+
 function newUser(stream, type) {
   let id = mid();
 
   users.push({ id, stream, type, room: 'main' });
   sendUser(stream, type, { type: 'welcome', data: id });
-  sendInRoom('main', {
-    type: 'message',
-    auth: 'server',
-    data: {
-      id: '',
-      name: 'Server',
-      color: '888888',
-      content: `${id} joined main`,
-      files: []
-    }
-  });
+  sendInRoom('main', newmessage({
+    name: 'Server',
+    content: `${id} joined main`
+  }, 'server'));
   sendInRoom('*', { type: 'stats', data: users.length });
 
   return id;
 }
 function leaveUser(id) {
   let user = users.find(user=>user.id===id);
-  sendInRoom(user.room, {
-    type: 'message',
-    auth: 'server',
-    data: {
-      id: '',
-      name: 'Server',
-      color: '888888',
-      content: `${id} left`,
-      files: []
-    }
-  });
+  sendInRoom(user.room, newmessage({
+    name: 'Server',
+    content: `${id} left`
+  }, 'server'));
   users = users.filter(user=>user.id!==id);
   sendInRoom('*', { type: 'stats', data: users.length });
 }
@@ -118,29 +119,19 @@ function handleMessage(data, id) {
       // If empty leave
       if (!data.data.content.trim() && !data.data.files.length) return;
       // Send to all on same room
-      sendInRoom(user.room, {
-        type: 'message',
-        auth: 'user',
-        data: {
-          id,
-          name: data.data.name || 'Anonymous',
-          color: data.data.color,
-          content: data.data.content,
-          files: data.data.files || []
-        }
-      });
+      sendInRoom(user.room, newmessage({
+        id,
+        name: data.data.name,
+        color: data.data.color,
+        content: data.data.content,
+        files: data.data.files,
+        reply: data.data.reply
+      }, 'user'));
       if (data.data.content.toLowerCase().includes('fsh')) {
-        sendInRoom(user.room, {
-          type: 'message',
-          auth: 'bot',
-          data: {
-            id: '',
-            name: 'Fsh',
-            color: '888888',
-            content: 'fsh',
-            files: []
-          }
-        });
+        sendInRoom(user.room, newmessage({
+          name: 'Fsh',
+          content: 'fsh'
+        }, 'bot'));
       }
       break;
     case 'room':
@@ -151,28 +142,14 @@ function handleMessage(data, id) {
         return user;
       });
       user = users.find(user=>user.id===id);
-      sendInRoom(lastroom, {
-        type: 'message',
-        auth: 'server',
-        data: {
-          id: '',
-          name: 'Server',
-          color: '888888',
-          content: `${id} left ${lastroom}`,
-          files: []
-        }
-      });
-      sendInRoom(user.room, {
-        type: 'message',
-        auth: 'server',
-        data: {
-          id: '',
-          name: 'Server',
-          color: '888888',
-          content: `${id} joined ${user.room}`,
-          files: []
-        }
-      });
+      sendInRoom(lastroom, newmessage({
+        name: 'Server',
+        content: `${id} left ${lastroom}`
+      }, 'server'));
+      sendInRoom(user.room, newmessage({
+        name: 'Server',
+        content: `${id} joined ${user.room}`
+      }, 'server'));
       break;
   }
 }

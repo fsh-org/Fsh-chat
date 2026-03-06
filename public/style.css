@@ -69,8 +69,14 @@ main {
   word-break: break-word;
 }
 .messagesDiv > div {
+  position: relative;
   display: flex;
   flex-direction: column;
+  border-radius: 0.25rem;
+  transition: background var(--time-2);
+}
+.messagesDiv > div:hover {
+  background-color: var(--bg-2);
 }
 .messagesDiv > div > b {
   display: flex;
@@ -84,6 +90,35 @@ time {
 .messagesDiv > div > span {
   word-break: break-word;
   white-space: break-spaces;
+}
+.messagesDiv > div:hover .actions {
+  opacity: 1;
+}
+.actions {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  opacity: 0;
+  transition: opacity var(--time-2);
+}
+.actions button {
+  display: flex;
+  margin: 0px;
+  padding: 0px;
+  border: none;
+}
+#replyto {
+  display: flex;
+  gap: 5px;
+  margin: 0px 5px;
+  padding: 2px 5px;
+  border-radius: 0.5rem;
+  background-color: var(--bg-2);
+}
+.reply {
+  display: flex;
+  gap: 5px;
+  margin-left: 5px;
 }
 .filePreview {
 	min-height: 0px;
