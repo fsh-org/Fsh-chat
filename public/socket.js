@@ -149,8 +149,8 @@ function Markdown(txt) {
         ttt[0] = ttt[0].replaceAll(/[^0-9a-fA-F]/g,'').slice(0,6);
         return `<label style="color:#${ttt[0]}">${ttt.slice(1).join(':')}</label>`;
       })
-  		// render custom emojis
-  		.replaceAll(/:([a-zA-Z0-9_<!%&\?\*\+\.\- ]+?):/g, (match,g1)=>emojiShort[g1.toLowerCase()]?(emojiShort[g1.toLowerCase()].startsWith('./')?`<img class="emoji" src="${emojiShort[g1.toLowerCase()]}" alt="emoji">`:emojiShort[g1.toLowerCase()]):match),
+      // render custom emojis
+      .replaceAll(/:([a-zA-Z0-9_<!%&\?\*\+\.\- ]+?):/g, (match,g1)=>emojiShort[g1.toLowerCase()]?(emojiShort[g1.toLowerCase()].startsWith('./')?`<img class="emoji" src="${emojiShort[g1.toLowerCase()]}" alt="emoji">`:emojiShort[g1.toLowerCase()]):match),
       {
         size: 'svg',
         ext: '.svg',
@@ -180,8 +180,13 @@ let replyto = null;
 window.reply = (id, name)=>{
   replyto = id;
   replytobar.style.display = '';
-  replytobar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path d="M256 132C256 120.954 247.046 112 236 112H60V112C26.8629 112 0 138.863 0 172V172V236C0 247.046 8.95431 256 20 256V256C31.0457 256 40 247.046 40 236V172V172C40 160.954 48.9543 152 60 152V152H236C247.046 152 256 143.046 256 132V132Z"/></svg>Replying to ${name}`;
+  replytobar.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path d="M256 132C256 120.954 247.046 112 236 112H60V112C26.8629 112 0 138.863 0 172V172V236C0 247.046 8.95431 256 20 256V256C31.0457 256 40 247.046 40 236V172V172C40 160.954 48.9543 152 60 152V152H236C247.046 152 256 143.046 256 132V132Z"/></svg>Replying to ${name}<div style="flex:1"></div><button onclick="window.unreply()" aria-label="Remove reply"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path d="M42.6776 7.32227C32.9145 -2.44063 17.0852 -2.44077 7.32214 7.32227C-2.44082 17.0853 -2.44069 32.9146 7.32214 42.6777L92.2616 127.617L7.32214 212.557C-2.44091 222.32 -2.44083 238.149 7.32214 247.912C17.0852 257.675 32.9145 257.675 42.6776 247.912L127.617 162.973L212.557 247.912C222.32 257.675 238.149 257.675 247.912 247.912C257.675 238.149 257.675 222.32 247.912 212.557L162.973 127.617L247.912 42.6777C257.675 32.9146 257.675 17.0853 247.912 7.32227C238.149 -2.44079 222.32 -2.44068 212.557 7.32227L127.617 92.2617L42.6776 7.32227Z"/></svg></button>`;
   messageField.focus();
+};
+window.unreply = ()=>{
+  replyto = null;
+  replytobar.style.display = 'none';
+  replytobar.innerText = '';
 };
 function showMessage(msg) {
   messageData[msg.data.mid] = msg;

@@ -115,26 +115,35 @@ time {
   border-radius: 0.5rem;
   background-color: var(--bg-2);
 }
+#replyto button {
+  display: flex;
+  padding: 0px;
+  margin: 0px;
+  border: none;
+}
 .reply {
   display: flex;
   gap: 5px;
   margin-left: 5px;
 }
 .filePreview {
-	min-height: 0px;
-	max-height: 15dvh;
-	overflow-y: auto;
-	border-radius: 0.5rem;
-	background-color: var(--bg-1);
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  max-height: 15dvh;
+  margin: 0px 5px;
+  border-radius: 0.5rem;
+  background-color: var(--bg-2);
+  overflow-y: auto;
 }
 .FileOnPreview {
-  max-height: 16dvh;
+  height: 15dvh;
   position: relative;
   display: inline-block;
 }
 .FOPImg {
-	height: 15dvh;
-	width: fit-content;
+  height: 15dvh;
+  width: fit-content;
 }
 audio.FOPImg {
   height: revert-layer;
@@ -212,10 +221,11 @@ audio.FOPImg {
 }
 .gif {
   width: 50%;
-  aspect-ratio: 1 / 1;
+  max-height: 33%;
   padding: 2px;
   cursor: pointer;
   box-sizing: border-box;
+  object-fit: contain;
 }
 
 #emojiPicker {
