@@ -4,6 +4,7 @@ let wsAttempts = 0;
 let wsMaxAttempts = 4;
 let sseHeartbeat;
 const ping = new Audio('./ping.mp3');
+const EmojiRegex = /^(?:\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier})?(?:\u200D\p{Extended_Pictographic})*){1,3}$/u;
 
 const messageField = document.getElementById('message');
 const replytobar = document.getElementById('replyto');
@@ -191,15 +192,15 @@ window.unreply = ()=>{
 function showMessage(msg) {
   messageData[msg.data.mid] = msg;
   let time = new Date(msg.data.time);
-  document.getElementById('msg').insertAdjacentHTML('afterbegin', `<div id="m-${msg.data.id}">
+  document.getElementById('msg').insertAdjacentHTML('afterbegin', `<div id="m-${msg.data.mid}">
   <div class="actions">
     ${msg.data.mid?`<button onclick="window.reply('${msg.data.mid}', '${msg.data.name}')" aria-label="Reply"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path d="M42 108H196V108C229.137 108 256 134.863 256 168V168V199.85C256 210.896 247.046 219.85 236 219.85V219.85C224.954 219.85 216 210.896 216 199.85V168V168C216 156.954 207.046 148 196 148V148H42V108Z"/><path d="M79.746 41.1778C83.0613 37.8625 87.5578 36 92.2464 36V36C107.996 36 115.883 55.0415 104.747 66.1782L47.2462 123.681C44.9032 126.024 44.9032 129.823 47.2462 132.166L104.747 189.67C115.883 200.806 107.996 219.848 92.2464 219.848V219.848C87.5579 219.848 83.0614 217.985 79.7461 214.67L5.72793 140.652C-1.30151 133.622 -1.30151 122.225 5.72793 115.196L79.746 41.1778Z"/></svg></button>`:''}
   </div>
-  ${msg.data.reply?`<div class="reply"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path d="M256 132C256 120.954 247.046 112 236 112H60V112C26.8629 112 0 138.863 0 172V172V236C0 247.046 8.95431 256 20 256V256C31.0457 256 40 247.046 40 236V172V172C40 160.954 48.9543 152 60 152V152H236C247.046 152 256 143.046 256 132V132Z"/></svg> ${messageData[msg.data.reply].data.name}: ${messageData[msg.data.reply].data.content}</div>`:''}
+  ${msg.data.reply?`<div class="reply" onclick="document.getElementById('m-${msg.data.reply}')?.scrollIntoView({ behavior: 'smooth', block: 'center' })"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path d="M256 132C256 120.954 247.046 112 236 112H60V112C26.8629 112 0 138.863 0 172V172V236C0 247.046 8.95431 256 20 256V256C31.0457 256 40 247.046 40 236V172V172C40 160.954 48.9543 152 60 152V152H236C247.046 152 256 143.046 256 132V132Z"/></svg> ${messageData[msg.data.reply].data.name}: ${messageData[msg.data.reply].data.content}${messageData[msg.data.reply].data.files.length?'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><path fill-rule="evenodd" clip-rule="evenodd" d="M0 40C0 28.9543 8.95431 20 20 20H236C247.046 20 256 28.9543 256 40V215C256 226.046 247.046 235 236 235H20C8.95431 235 0 226.046 0 215V40ZM78 68C78 81.8071 66.8071 93 53 93C39.1929 93 28 81.8071 28 68C28 54.1929 39.1929 43 53 43C66.8071 43 78 54.1929 78 68ZM150.135 91.8679C153.266 86.7107 160.734 86.7107 163.865 91.8679L234.817 208.76C238.075 214.127 234.22 221 227.952 221H142.029H86.048H26.9705C20.3787 221 16.6463 213.367 20.6525 208.08L78.1821 132.152C81.3664 127.949 87.6335 127.949 90.8179 132.152L110.176 157.7L150.135 91.8679Z"/></svg>':''}</div>`:''}
   ${(msg.auth!=='user' || last!==msg.data.id || msg.data.reply)?`<b style="color:#${msg.data.color}">
     ${userIcons[msg.auth]??''} ${msg.data.name} <time>${time.getHours()}:${String(time.getMinutes()).padStart(2, '0')}</time>
   </b>`:''}
-  <span>${styleMessageContent(msg.data.content, msg.auth)}</span>
+  <span${EmojiRegex.test(msg.data.content.replaceAll(/\s/g,''))?' class="big-emoji"':''}>${styleMessageContent(msg.data.content, msg.auth)}</span>
   ${msg.data.files.length?`<div>${msg.data.files.map(file => DataToElem(file)).join('')}</div>`:''}
 </div>`);
   last = msg.data.id;
